@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <Folder Include="Drivers\" />
+    <Folder Include="NewFolder1\" />
     <Folder Include="NewFolder\" />
   </ItemGroup>
 
