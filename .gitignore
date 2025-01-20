@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/.github/workflows/run-tests.yml
+/Tests/HomePage.cs
+/Tests/RegistrationTests.cs
+/.gitignore
+/www.menkind.co.uk.csproj
