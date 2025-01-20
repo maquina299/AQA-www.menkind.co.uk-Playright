@@ -18,10 +18,10 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '6.0.x'
     
@@ -47,7 +47,7 @@ jobs:
         DOTNET_ENVIRONMENT: Test
 
     - name: Upload test results
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: always()
       with:
         name: test-results
@@ -64,8 +64,8 @@ jobs:
 
     - name: Deploy report to Github Pages
       if: always()
-      uses: peaceiris/actions-gh-pages@v2
-      env:
-        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: allure-history
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: allure-history
