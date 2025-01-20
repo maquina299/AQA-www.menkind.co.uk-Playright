@@ -26,6 +26,6 @@ namespace www.menkind.co.uk.Pages
             return _driver.Title;
         }
 
-        // Add other methods specific to the home page as needed
+        // Add other methods specific to the home page as needed!
     }
 }

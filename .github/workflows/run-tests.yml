@@ -6,11 +6,7 @@ on:
   pull_request:
     branches: [ main ]
 
-jobs:ChromeOptions options = new ChromeOptions();
-options.AddArgument("--headless");
-options.AddArgument("--no-sandbox");
-options.AddArgument("--disable-dev-shm-usage");
-_driver = new ChromeDriver(options);
+jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
