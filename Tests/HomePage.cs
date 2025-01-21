@@ -1,12 +1,10 @@
 ﻿using NLog;
 using www.menkind.co.uk.Pages;
 using www.menkind.co.uk.Base;
-using Allure.Net.Commons;
 
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
-    [AllureNUnit]
     public class HomePageTests
     {
         // Added: _basePage for handling common operations
@@ -40,9 +38,7 @@ namespace www.menkind.co.uk.Tests
         [AllureTag("Smoke")]
         [AllureOwner("YourName")]
         [AllureSeverity(SeverityLevel.normal)]
-        [AllureIssue("ISSUE-1")]
         [AllureTms("TMS-12")]
-        [AllureSubSuite("Home")]
         public void Test_HomePageLoadsSuccessfully()
         {
             Logger.Info("Executing Test_HomePageLoadsSuccessfully");

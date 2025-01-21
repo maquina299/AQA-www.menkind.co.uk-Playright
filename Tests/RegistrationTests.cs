@@ -14,7 +14,7 @@ namespace www.menkind.co.uk.Tests
         [SetUp]
         public void SetUp()
         {
-            ChromeOptions options = new ChromeOptions();
+            ChromeOptions options = new();
             options.AddArgument("--headless");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
@@ -60,8 +60,11 @@ namespace www.menkind.co.uk.Tests
                 var successMessage = _wait.Until(driver =>
                     driver.FindElement(By.CssSelector("h1.page-heading.classyunicodedone"))
                 );
-                Assert.That(successMessage.Displayed, "Success message should be displayed");
-                Assert.That(successMessage.Text, Does.Contain("Your account has been created"));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(successMessage.Displayed, "Success message should be displayed");
+                    Assert.That(successMessage.Text, Does.Contain("Your account has been created"));
+                });
             }
             catch (Exception ex)
             {
