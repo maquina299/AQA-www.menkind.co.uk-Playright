@@ -48,9 +48,18 @@
             {
                 Console.WriteLine($"Error while handling discount modal: {ex.Message}");
             }
-
-
-
         }
+
+        /*
+         * public void TearDown()
+        {
+            if (_driver != null)
+            {
+                _driver?.Quit();
+                _driver?.Dispose();
+            }
+        }
+        */
     }
+
 }
