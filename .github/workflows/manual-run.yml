@@ -15,7 +15,7 @@ on:
 
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
@@ -32,17 +32,19 @@ jobs:
       run: dotnet build --no-restore
     
     - name: Install Chrome
-      uses: browser-actions/setup-chrome@latest
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
 
     - name: Run tests
       run: |
-        if ("${{ github.event.inputs.test_suite }}" -eq "homepage") {
+        if [ "${{ github.event.inputs.test_suite }}" = "homepage" ]; then
           dotnet test --filter "FullyQualifiedName~HomePage"
-        } elseif ("${{ github.event.inputs.test_suite }}" -eq "registration") {
+        elif [ "${{ github.event.inputs.test_suite }}" = "registration" ]; then
           dotnet test --filter "FullyQualifiedName~Registration"
-        } else {
+        else
           dotnet test
-        }
+        fi
       env:
         DOTNET_ENVIRONMENT: Test
 
@@ -61,6 +63,7 @@ jobs:
         allure_report: allure-report
         gh_pages: gh-pages
         allure_history: allure-history
+        keep_reports: 20
 
     - name: Deploy report to Github Pages
       if: always()
