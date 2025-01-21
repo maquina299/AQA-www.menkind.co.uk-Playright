@@ -5,6 +5,9 @@ using www.menkind.co.uk.Base;
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
+    [AllureSuite("Main suite")]
+    [AllureSubSuite("Home Page")]
+
     public class HomePageTests
     {
         // Added: _basePage for handling common operations
