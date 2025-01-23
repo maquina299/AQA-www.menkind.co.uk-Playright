@@ -11,7 +11,7 @@
         protected static ChromeOptions GetChromeOptions()
         {
             ChromeOptions options = new ();
-            options.AddArgument("--headless");  options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
+            //options.AddArgument("--headless");  options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
             options.AddArgument("--remote-debugging-port=9222");
             return options;
         }
