@@ -16,12 +16,11 @@ namespace www.menkind.co.uk.Tests
 
 
         [SetUp]
+
         public void SetUp()
         {
-            ChromeOptions options = new();
-            options.AddArgument("--headless");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--disable-dev-shm-usage");
+            
+            
             // Initialize Chrome
             _driver = new ChromeDriver();
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));

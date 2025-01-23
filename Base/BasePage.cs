@@ -41,7 +41,7 @@ namespace www.menkind.co.uk.Base
             try
             {
                 // Wait for Cookies modal to appear using ExpectedConditions
-                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(10));
+                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(5));
                 var cookiesModal = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]")));
 
                 if (cookiesModal.Displayed)
@@ -66,7 +66,7 @@ namespace www.menkind.co.uk.Base
             try
             {
                 // Wait for Discount modal to appear
-                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(10));
+                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(5));
                 var discountModalCloseButton = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(text(), 'No Thanks. Close Form')]")));
 
                 if (discountModalCloseButton.Displayed)
