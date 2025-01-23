@@ -24,7 +24,7 @@ namespace MenkindRegistrationTests.Pages
 
         private IWebElement? SubmitButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Create Account']"));
 
-        private IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
+        public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
 
         public bool IsUserLoggedIn()
         {

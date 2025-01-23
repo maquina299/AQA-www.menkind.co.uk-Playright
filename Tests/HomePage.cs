@@ -12,9 +12,8 @@ namespace www.menkind.co.uk.Tests
     public class HomePageTests
     {
         private IWebDriver _driver;
-        private WebDriverWait _wait;
         private BasePage? _basePage;
-        private bool _testFailed = false;
+        //private readonly bool _testFailed = false;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 
@@ -22,11 +21,12 @@ namespace www.menkind.co.uk.Tests
 
         public void SetUp()
         {
-
+            // Initialize Chrome with headless option
+            ChromeOptions options = new ();
+            options.AddArgument("--headless");             options.AddArgument("--no-sandbox");            options.AddArgument("--disable-dev-shm-usage");
 
             // Initialize Chrome
-            _driver = new ChromeDriver();
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            _driver = new ChromeDriver(options);
             _driver.Manage().Window.Maximize();
 
             // Initialize BasePage
@@ -47,7 +47,7 @@ namespace www.menkind.co.uk.Tests
         [AllureSeverity(SeverityLevel.normal)]
         [AllureTms("TMS-12")]
         public void HomePageLoadsSuccessfully()
-        {
+        { 
             var homePage = new HomePageObject(_driver);
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
@@ -64,16 +64,25 @@ namespace www.menkind.co.uk.Tests
         [Test]
         public void LoginSuccessful()
         {
+            Console.WriteLine(TestData.ValidEmail);
             var homePage = new HomePageObject(_driver);
 
             Logger.Debug("Executing LoginSuccessful test");
+            // var successMessage = _wait?.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(homePage.SignInLink));
+            // homePage.SignIn();
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", homePage.SignInLink);
+
+            Logger.Debug("Filling in the Testdata");
+            
+            homePage.EnterLoginEmail(TestData.ValidEmail);
+            homePage.EnterLoginPass(TestData.ValidPassword);
+
+            Logger.Debug("Clicking submit button");
+               
+            //var successMessage = _wait?.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(homePage.SignInButton));
             homePage.Submit();
             Logger.Debug("Login button clicked");
-            homePage.EnterLoginEmail("testuser_cd17ee00-86e6-4e48-acbd-cc5835d8be2b@example.com");
-            homePage.EnterLoginPass("TestPassword123!");
-            var successMessage = _wait?.Until(driver =>
-                   driver.FindElement(By.CssSelector("h1.page-heading.classyunicodedone"))
-               );
+
             Logger.Info("Executing test user's logging");
             Assert.That(homePage.IsUserLoggedIn(), Is.True, "User is not logged in after registration");
             Logger.Info("User is logged in successfully");
