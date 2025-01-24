@@ -7,7 +7,7 @@
 This repository contains automated tests for the [Menkind](https://www.menkind.co.uk/) website. The tests are written in C# using Selenium WebDriver.
 
 ## Features
-
+- Integration with Allure Test Management System (TMS) for comprehensive reporting.
 - Automated UI testing for key website functionalities.
 - Modular and reusable code structure.
 - Easy integration with CI/CD pipelines.
@@ -63,7 +63,7 @@ This project provides an automated testing solution for the [Menkind](https://ww
 ## Technology Stack
 
 - **Programming Language**: C#
-- **Frameworks**: Selenium WebDriver, NUnit
+- **Frameworks**: Selenium WebDriver, NUnit, Allure
 - **Build Tools**: .NET CLI
 - **Version Control**: Git
 
@@ -101,7 +101,7 @@ This project provides an automated testing solution for the [Menkind](https://ww
 
 ### Directory Structure
 
-- **/Base:** 
+- **/Base:** Contains base classes for setting up drivers, test initialization, and reusable test components. 
 - **/Tests:** Contains all test scripts.
 - **/Page**: Implements the Page Object Model for maintaining website elements.
 - **/Config**: Stores configuration files and settings used across the tests.

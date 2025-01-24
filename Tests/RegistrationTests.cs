@@ -40,6 +40,11 @@ namespace www.menkind.co.uk.Tests
 
 
         [Test]
+        [Category("Regression")]
+        [AllureTag("Regression")]
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureTms("TMS-xx")]
         public void UserRegistration_ShouldSucceed()
         {
             try

@@ -5,12 +5,9 @@ using MenkindRegistrationTests.Pages;
 
 namespace www.menkind.co.uk.Tests
 {
-    [AllureNUnit]
-
     [TestFixture]
     [AllureSuite("Main suite")]
     [AllureSubSuite("Home Page")]
-    [Obsolete]
     public class HomePageTests
     {
         private IWebDriver _driver;
@@ -44,10 +41,11 @@ namespace www.menkind.co.uk.Tests
        
 
         [Test]
-        [AllureTag("Regression")]
+        [Category("Smoke")]
+        [AllureTag("Smoke")]
         [AllureOwner("Vlad")]
-        [AllureSeverity(SeverityLevel.normal)]
-        [AllureTms("TMS-12")]
+        [AllureSeverity(SeverityLevel.critical)]
+        [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
         { 
             var homePage = new HomePageObject(_driver);
@@ -64,6 +62,11 @@ namespace www.menkind.co.uk.Tests
         }
 
         [Test]
+        [Category("Regression")]
+        [AllureTag("Regression")]
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureTms("TMS-xx")]
         public void LoginSuccessful()
         {
             Console.WriteLine(TestData.ValidEmail);
