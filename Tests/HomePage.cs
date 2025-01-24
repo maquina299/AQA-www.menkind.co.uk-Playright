@@ -7,8 +7,7 @@ namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
     [AllureNUnit]
-    [AllureSuite("Main suite")]
-    [AllureSubSuite("Home Page")]
+    [AllureSuite("Homepage")]
     [Obsolete]
     public class HomePageTests
     {
@@ -44,6 +43,7 @@ namespace www.menkind.co.uk.Tests
 
         [Test]
         [Category("Smoke")]
+        [AllureSubSuite("Smoke")]
         [AllureTag("Smoke")]
         [AllureOwner("Vlad")]
         [AllureSeverity(SeverityLevel.critical)]
@@ -66,6 +66,8 @@ namespace www.menkind.co.uk.Tests
         [Test]
         [Category("Regression")]
         [AllureTag("Regression")]
+        [AllureSubSuite("Regression")]
+
         [AllureOwner("Vlad")]
         [AllureSeverity(SeverityLevel.normal)]
         [AllureTms("TMS-xx")]
