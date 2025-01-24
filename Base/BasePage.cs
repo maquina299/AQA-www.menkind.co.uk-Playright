@@ -22,12 +22,24 @@ namespace www.menkind.co.uk.Base
         {
             _driver = driver;
         }
+        public void InitializeDriver()
+        {
+            _driver = new ChromeDriver(GetChromeOptions());
+        }
         protected static ChromeOptions GetChromeOptions()
         {
             ChromeOptions options = new ();
             //options.AddArgument("--headless");  options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
             options.AddArgument("--remote-debugging-port=9222");
             return options;
+        }
+        public void TearDown()
+        {
+            if (_driver != null)
+            {
+                _driver?.Quit();
+                _driver?.Dispose();
+            }
         }
 
         public void HandleModals()
@@ -85,14 +97,7 @@ namespace www.menkind.co.uk.Base
             }
         }
 
-       /*  public void TearDown()
-        {
-            if (_driver != null)
-            {
-                _driver?.Quit();
-                _driver?.Dispose();
-            }
-        }*/
+      
         
     }
 

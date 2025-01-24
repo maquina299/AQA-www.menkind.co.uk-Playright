@@ -11,7 +11,7 @@ namespace www.menkind.co.uk.Tests
     [Obsolete]
     public class HomePageTests
     {
-        private IWebDriver _driver;
+        private IWebDriver? _driver;
         private BasePage? _basePage;
         //private readonly bool _testFailed = false;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -21,6 +21,7 @@ namespace www.menkind.co.uk.Tests
 
         public void SetUp()
         {
+            /*
             // Initialize Chrome with headless option
             ChromeOptions options = new ();
             options.AddArgument("--headless");             options.AddArgument("--no-sandbox");            options.AddArgument("--disable-dev-shm-usage");
@@ -33,10 +34,16 @@ namespace www.menkind.co.uk.Tests
             _basePage = new BasePage(_driver);
 
             // Navigate to the homepage or registration page
-            _driver.Navigate().GoToUrl("https://www.menkind.co.uk/");
+            _driver.Navigate().GoToUrl("https://www.menkind.co.uk/");*/
 
             // Handle modals
-            _basePage.HandleModals();
+            {
+                _basePage = new BasePage(_driver!);
+                _basePage.InitializeDriver();
+                _basePage.HandleModals();
+
+            }
+
         }
 
        
@@ -50,7 +57,7 @@ namespace www.menkind.co.uk.Tests
         [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
         { 
-            var homePage = new HomePageObject(_driver);
+            var homePage = new HomePageObject(_driver!);
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
             {
@@ -100,11 +107,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            if (_driver != null)
-            {
-                _driver.Quit();
-                _driver.Dispose();
-            }
+            _basePage?.TearDown();
         }
     }
 }
