@@ -2,10 +2,13 @@
 using www.menkind.co.uk.Base;
 using OpenQA.Selenium.Support.Extensions;
 
-
 namespace www.menkind.co.uk.Tests
 {
+    [AllureNUnit]
     [TestFixture]
+    [AllureSuite("Main suite")]
+    [AllureSubSuite("Registration Page")]
+    [Obsolete]
     public class RegistrationTests
     {
         private IWebDriver _driver;
@@ -19,27 +22,23 @@ namespace www.menkind.co.uk.Tests
 
         public void SetUp()
         {
-            // Initialize Chrome with headless option
-            ChromeOptions options = new();
-            options.AddArgument("--headless"); options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
-
-            // Initialize Chrome
-            _driver = new ChromeDriver(options);
+            _basePage = new BasePage(null);
+            _basePage.InitializeDriver();
+            _driver = _basePage.GetDriver();
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
-            _driver.Manage().Window.Maximize();
 
-            // Initialize BasePage
-            _basePage = new BasePage(_driver);
-
-            // Navigate to the homepage or registration page
-            _driver.Navigate().GoToUrl("https://www.menkind.co.uk/login.php?action=create_account");
-
-            // Handle modals
+            // Navigate to the registration page
+            _basePage.NavigateToUrl("https://www.menkind.co.uk/login.php?action=create_account");
             _basePage.HandleModals();
         }
 
 
         [Test]
+        [Category("Regression")]
+        [AllureTag("Regression")]
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureTms("TMS-xx")]
         public void UserRegistration_ShouldSucceed()
         {
             try
@@ -91,13 +90,14 @@ namespace www.menkind.co.uk.Tests
         {
             if (_testFailed)
             {
-                Console.WriteLine("Test failed. Browser will remain open for inspection.");
+                Logger.Info("Test failed. Browser will remain open for inspection.");
             }
             else
             {
                 _driver?.TakeScreenshot().SaveAsFile("success_screenshot.png");
                 // Close the browser
-                _driver?.Quit(); _driver?.Dispose();
+                _basePage?.TearDown();
+                _driver?.Dispose();
             }
         }
     }

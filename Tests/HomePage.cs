@@ -5,52 +5,42 @@ using MenkindRegistrationTests.Pages;
 
 namespace www.menkind.co.uk.Tests
 {
-    [AllureNUnit]
-
     [TestFixture]
-    [AllureSuite("Main suite")]
-    [AllureSubSuite("Home Page")]
+    [AllureNUnit]
+    [AllureSuite("Homepage")]
     [Obsolete]
     public class HomePageTests
     {
-        private IWebDriver _driver;
+        private IWebDriver? _driver;
         private BasePage? _basePage;
-        //private readonly bool _testFailed = false;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 
         [SetUp]
 
         public void SetUp()
-        {
-            // Initialize Chrome with headless option
-            ChromeOptions options = new ();
-            options.AddArgument("--headless");             options.AddArgument("--no-sandbox");            options.AddArgument("--disable-dev-shm-usage");
+        {           
+            _basePage = new BasePage(null);
+            _basePage.InitializeDriver();
+            _driver = _basePage.GetDriver();
 
-            // Initialize Chrome
-            _driver = new ChromeDriver(options);
-            _driver.Manage().Window.Maximize();
-
-            // Initialize BasePage
-            _basePage = new BasePage(_driver);
-
-            // Navigate to the homepage or registration page
-            _driver.Navigate().GoToUrl("https://www.menkind.co.uk/");
-
-            // Handle modals
+            // Navigate to the homepage
+            _basePage.NavigateToUrl("https://www.menkind.co.uk/");
             _basePage.HandleModals();
         }
 
        
 
         [Test]
-        [AllureTag("Regression")]
+        [Category("Smoke")]
+        [AllureSubSuite("Smoke")]
+        [AllureTag("Smoke")]
         [AllureOwner("Vlad")]
-        [AllureSeverity(SeverityLevel.normal)]
-        [AllureTms("TMS-12")]
+        [AllureSeverity(SeverityLevel.critical)]
+        [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
         { 
-            var homePage = new HomePageObject(_driver);
+            var homePage = new HomePageObject(_driver!);
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
             {
@@ -64,14 +54,20 @@ namespace www.menkind.co.uk.Tests
         }
 
         [Test]
+        [Category("Regression")]
+        [AllureTag("Regression")]
+        [AllureSubSuite("Regression")]
+
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureTms("TMS-xx")]
         public void LoginSuccessful()
         {
             Console.WriteLine(TestData.ValidEmail);
             var homePage = new HomePageObject(_driver);
 
             Logger.Debug("Executing LoginSuccessful test");
-            // var successMessage = _wait?.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(homePage.SignInLink));
-            // homePage.SignIn();
+
             ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", homePage.SignInLink);
 
             Logger.Debug("Filling in the Testdata");
@@ -81,7 +77,6 @@ namespace www.menkind.co.uk.Tests
 
             Logger.Debug("Clicking submit button");
                
-            //var successMessage = _wait?.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(homePage.SignInButton));
             homePage.Submit();
             Logger.Debug("Login button clicked");
 
@@ -93,11 +88,8 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            if (_driver != null)
-            {
-                _driver.Quit();
-                _driver.Dispose();
-            }
+            _basePage?.TearDown();
+            _driver?.Dispose();
         }
     }
 }
