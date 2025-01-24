@@ -54,7 +54,7 @@
     </None>
   </ItemGroup>
 	<ItemGroup>
-		<None Update="allureConfig.json">
+		<None Update="Config\Allure\allureConfig.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
