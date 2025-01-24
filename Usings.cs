@@ -6,3 +6,6 @@ global using OpenQA.Selenium.Support.UI;
 global using Allure.NUnit.Attributes;
 global using NUnit.Allure.Core;
 global using Allure.Net.Commons;
+global using NLog;
+global using NLog.Config;
+global using SeleniumExtras.WaitHelpers;

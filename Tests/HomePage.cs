@@ -1,57 +1,93 @@
-﻿using NLog;
-using www.menkind.co.uk.Pages;
+﻿using www.menkind.co.uk.Pages;
 using www.menkind.co.uk.Base;
+using OpenQA.Selenium.Support.Extensions;
+using MenkindRegistrationTests.Pages;
 
 namespace www.menkind.co.uk.Tests
 {
+    [AllureNUnit]
+
     [TestFixture]
     [AllureSuite("Main suite")]
     [AllureSubSuite("Home Page")]
-
+    [Obsolete]
     public class HomePageTests
     {
-        // Added: _basePage for handling common operations
         private IWebDriver _driver;
-        private BasePage _basePage;
-        private HomePageObject _homePageObject;
+        private BasePage? _basePage;
+        //private readonly bool _testFailed = false;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+
         [SetUp]
-        public void Setup()
+
+        public void SetUp()
         {
-            Console.WriteLine("Initializing ChromeDriver...");
-            ChromeOptions options = new();
-            options.AddArgument("--headless");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--remote-debugging-port=9222");
+            // Initialize Chrome with headless option
+            ChromeOptions options = new ();
+            options.AddArgument("--headless");             options.AddArgument("--no-sandbox");            options.AddArgument("--disable-dev-shm-usage");
+
+            // Initialize Chrome
             _driver = new ChromeDriver(options);
-            Console.WriteLine("ChromeDriver initialized.");
-            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             _driver.Manage().Window.Maximize();
 
-
+            // Initialize BasePage
             _basePage = new BasePage(_driver);
-            _homePageObject = new HomePageObject(_driver);
-            _driver.Navigate().GoToUrl("https://www.menkind.co.uk");
+
+            // Navigate to the homepage or registration page
+            _driver.Navigate().GoToUrl("https://www.menkind.co.uk/");
+
+            // Handle modals
             _basePage.HandleModals();
         }
 
+       
+
         [Test]
-        [AllureTag("Smoke")]
-        [AllureOwner("YourName")]
+        [AllureTag("Regression")]
+        [AllureOwner("Vlad")]
         [AllureSeverity(SeverityLevel.normal)]
         [AllureTms("TMS-12")]
-        public void Test_HomePageLoadsSuccessfully()
-        {
-            Logger.Info("Executing Test_HomePageLoadsSuccessfully");
+        public void HomePageLoadsSuccessfully()
+        { 
+            var homePage = new HomePageObject(_driver);
+            Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
-            {              
-                Assert.That(_homePageObject.IsLogoDisplayed(), Is.True, "Logo is not displayed");
-                //Assert.That(_homePageObject.IsLogoLoaded(), Is.True, "Logo is not properly loaded or may be corrupted");
-                Assert.That(_homePageObject.GetTitle(), Is.EqualTo("Menkind | Unique Gadgets & Gifts for Men"), "Page title does not match expected");
+            {
+                Logger.Debug("Checking if logo is displayed");
+                Assert.That(homePage.IsLogoDisplayed(), Is.True, "Logo is not displayed");
+                Assert.That(homePage.IsLogoLoaded(), Is.True, "Logo is not properly loaded or may be corrupted");
+                Logger.Debug("Verifying page title");
+                Assert.That(homePage.GetTitle(), Is.EqualTo("Menkind | Unique Gadgets & Gifts for Men"), "Page title does not match expected");
             });
-            Logger.Info("Test completed successfully");
+            Logger.Debug("Test completed successfully");
+        }
+
+        [Test]
+        public void LoginSuccessful()
+        {
+            Console.WriteLine(TestData.ValidEmail);
+            var homePage = new HomePageObject(_driver);
+
+            Logger.Debug("Executing LoginSuccessful test");
+            // var successMessage = _wait?.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(homePage.SignInLink));
+            // homePage.SignIn();
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", homePage.SignInLink);
+
+            Logger.Debug("Filling in the Testdata");
+            
+            homePage.EnterLoginEmail(TestData.ValidEmail);
+            homePage.EnterLoginPass(TestData.ValidPassword);
+
+            Logger.Debug("Clicking submit button");
+               
+            //var successMessage = _wait?.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(homePage.SignInButton));
+            homePage.Submit();
+            Logger.Debug("Login button clicked");
+
+            Logger.Info("Executing test user's logging");
+            Assert.That(homePage.IsUserLoggedIn(), Is.True, "User is not logged in after registration");
+            Logger.Info("User is logged in successfully");
         }
 
         [TearDown]
@@ -59,8 +95,8 @@ namespace www.menkind.co.uk.Tests
         {
             if (_driver != null)
             {
-                _driver?.Quit();
-                _driver?.Dispose();
+                _driver.Quit();
+                _driver.Dispose();
             }
         }
     }

@@ -42,17 +42,20 @@ jobs:
     - name: Run tests
       run: |
         if [ "${{ github.event.inputs.test_suite }}" = "homepage" ]; then
-          dotnet test --filter "FullyQualifiedName~HomePage"
+        dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~HomePage"
         elif [ "${{ github.event.inputs.test_suite }}" = "registration" ]; then
-          dotnet test --filter "FullyQualifiedName~Registration"
-        else
-          dotnet test
-        fi
+        dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Registration"
+          else
+             dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results
+                fi
       env:
-        DOTNET_ENVIRONMENT: Test
+       DOTNET_ENVIRONMENT: Test
+
+    - name: List allure-results directory contents
+      run: ls -la allure-results
 
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results

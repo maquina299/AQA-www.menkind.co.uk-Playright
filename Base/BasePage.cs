@@ -1,8 +1,22 @@
-﻿namespace www.menkind.co.uk.Base
+﻿using OpenQA.Selenium.Support.Extensions;
+
+namespace www.menkind.co.uk.Base
 {
     public class BasePage
     {
-        protected IWebDriver _driver;
+        protected IWebDriver? _driver;
+
+        protected static readonly Logger Logger;
+
+        static BasePage()
+        {
+            // Initialize NLog
+            var config = new XmlLoggingConfiguration("Config/NLog.config");
+            LogManager.Configuration = config;
+            Logger = LogManager.GetCurrentClassLogger();
+        }
+
+    
 
         public BasePage(IWebDriver driver)
         {
@@ -17,56 +31,69 @@
         }
 
         public void HandleModals()
+
         {
+            if (_driver == null)
+            {
+                Console.WriteLine("WebDriver is not initialized.");
+                return;
+            }
             try
             {
-                // Закрытие окна Cookies
-                var cookiesModal = _driver.FindElement(By.XPath("//button[contains(text(), 'Allow all Cookies')]"));
+                // Wait for Cookies modal to appear using ExpectedConditions
+                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(5));
+                var cookiesModal = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]")));
+
                 if (cookiesModal.Displayed)
                 {
                     var acceptCookiesButton = cookiesModal.FindElement(By.XPath("//button[contains(text(), 'Allow all Cookies')]"));
                     acceptCookiesButton.Click();
-                    Console.WriteLine("Cookies modal closed.");
+                    Logger.Info("Cookies modal closed.");
                 }
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
-                Console.WriteLine("Cookies modal not found.");
+                Logger.Warn("Cookies modal not found within the wait time.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while handling cookies modal: {ex.Message}");
+                Logger.Error($"Error while handling cookies modal: {ex.Message}");
             }
+            // Scroll down to the end of the page to make the discount modal appears
+            Logger.Info("Scrolling down to the end of the page");
+            _driver.ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
+
             try
             {
-                // Закрытие окна Discount
-                var discountModalCloseButton = _driver.FindElement(By.XPath("//button[contains(text(), 'No Thanks. Close Form')]"));
+                // Wait for Discount modal to appear
+                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(5));
+                var discountModalCloseButton = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(text(), 'No Thanks. Close Form')]")));
+
                 if (discountModalCloseButton.Displayed)
                 {
                     discountModalCloseButton.Click();
-                    Console.WriteLine("Discount modal closed.");
+                    Logger.Info("Discount modal closed.");
                 }
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
-                Console.WriteLine("Discount modal not found.");
+                Logger.Info("Discount modal not found within the wait time.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while handling discount modal: {ex.Message}");
+                Logger.Error($"Error while handling discount modal: {ex.Message}");
             }
         }
 
-        /*
-         * public void TearDown()
+       /*  public void TearDown()
         {
             if (_driver != null)
             {
                 _driver?.Quit();
                 _driver?.Dispose();
             }
-        }
-        */
+        }*/
+        
     }
 
 }
