@@ -1,0 +1,16 @@
+{
+  [
+    
+      {
+        "name": "Known issues",
+        "matchedStatuses": [ "failed" ],
+        "messageRegex": ".*NullPointerException.*"
+      },
+      {
+        "matchedStatuses": [ "broken" ],
+        "name": "Flaky tests",
+        "traceRegex": ".*TimeoutException.*"
+      }
+    
+  ]
+}
