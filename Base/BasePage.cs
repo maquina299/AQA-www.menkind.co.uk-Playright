@@ -2,9 +2,9 @@
 
 namespace www.menkind.co.uk.Base
 {
-    public class BasePage(IWebDriver? driver)
+    public class BasePage
     {
-        protected IWebDriver? _driver = driver;
+        protected IWebDriver? _driver;
 
         protected static readonly Logger Logger;
 
@@ -15,7 +15,10 @@ namespace www.menkind.co.uk.Base
             LogManager.Configuration = config;
             Logger = LogManager.GetCurrentClassLogger();
         }
-
+        public BasePage(IWebDriver? driver)
+        {
+            _driver = driver;
+        }
         public void InitializeDriver()
         {
             if (_driver == null)
