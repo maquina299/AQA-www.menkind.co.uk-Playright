@@ -6,6 +6,9 @@ using OpenQA.Selenium.Support.Extensions;
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
+    [AllureSuite("Main suite")]
+    [AllureSubSuite("Registration Page")]
+
     public class RegistrationTests
     {
         private IWebDriver _driver;

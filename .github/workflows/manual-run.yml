@@ -12,6 +12,8 @@ on:
         - all
         - homepage
         - registration
+        - smoke
+        - regression
 permissions:
   contents: write
 
@@ -42,12 +44,16 @@ jobs:
     - name: Run tests
       run: |
         if [ "${{ github.event.inputs.test_suite }}" = "homepage" ]; then
-        dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~HomePage"
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~HomePage"
         elif [ "${{ github.event.inputs.test_suite }}" = "registration" ]; then
-        dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Registration"
-          else
-             dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results
-                fi
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Registration"
+        elif [ "${{ github.event.inputs.test_suite }}" = "smoke" ]; then
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Smoke"
+        elif [ "${{ github.event.inputs.test_suite }}" = "regression" ]; then
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Regression"
+        else
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results
+        fi
       env:
        DOTNET_ENVIRONMENT: Test
 
