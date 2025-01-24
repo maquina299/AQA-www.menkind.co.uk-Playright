@@ -2,9 +2,9 @@
 
 namespace www.menkind.co.uk.Base
 {
-    public class BasePage
+    public class BasePage(IWebDriver? driver)
     {
-        protected IWebDriver? _driver;
+        protected IWebDriver? _driver = driver;
 
         protected static readonly Logger Logger;
 
@@ -16,29 +16,40 @@ namespace www.menkind.co.uk.Base
             Logger = LogManager.GetCurrentClassLogger();
         }
 
-    
-
-        public BasePage(IWebDriver driver)
-        {
-            _driver = driver;
-        }
         public void InitializeDriver()
         {
-            _driver = new ChromeDriver(GetChromeOptions());
+            if (_driver == null)
+            {
+                ChromeOptions options = new();
+                options.AddArgument("--headless"); options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
+
+                _driver = new ChromeDriver(options);
+                _driver.Manage().Window.Maximize();
+            }
         }
-        protected static ChromeOptions GetChromeOptions()
+        public IWebDriver GetDriver()
         {
-            ChromeOptions options = new ();
-            //options.AddArgument("--headless");  options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--remote-debugging-port=9222");
-            return options;
+            if (_driver == null)
+            {
+                throw new InvalidOperationException("Driver is not initialized.");
+            }
+            return _driver;
+        }
+        public void NavigateToUrl(string url)
+        {
+            if (_driver == null)
+            {
+                throw new InvalidOperationException("WebDriver is not initialized.");
+            }
+            _driver.Navigate().GoToUrl(url);
         }
         public void TearDown()
         {
             if (_driver != null)
             {
-                _driver?.Quit();
-                _driver?.Dispose();
+                _driver.Quit();
+                _driver.Dispose();
+                _driver = null;
             }
         }
 
