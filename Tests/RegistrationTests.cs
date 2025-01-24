@@ -2,13 +2,13 @@
 using www.menkind.co.uk.Base;
 using OpenQA.Selenium.Support.Extensions;
 
-
 namespace www.menkind.co.uk.Tests
 {
+    [AllureNUnit]
     [TestFixture]
     [AllureSuite("Main suite")]
     [AllureSubSuite("Registration Page")]
-
+    [Obsolete]
     public class RegistrationTests
     {
         private IWebDriver _driver;

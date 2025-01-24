@@ -6,8 +6,10 @@ using MenkindRegistrationTests.Pages;
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
+    [AllureNUnit]
     [AllureSuite("Main suite")]
     [AllureSubSuite("Home Page")]
+    [Obsolete]
     public class HomePageTests
     {
         private IWebDriver _driver;
