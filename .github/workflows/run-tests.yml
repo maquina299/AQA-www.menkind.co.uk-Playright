@@ -1,47 +1,65 @@
-name: .NET Tests
+name: Run Smoke Tests on deployment
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - master
+permissions:
+  contents: write
 
 jobs:
-  build-and-test:
+
+  test:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - uses: actions/checkout@v2
-
+    - uses: actions/checkout@v3
+    
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '6.0.x'
-
-    - name: Setup Chrome
-      uses: browser-actions/setup-chrome@latest
-
-    - name: Setup ChromeDriver
-      uses: nanasess/setup-chromedriver@master
-
-    - name: Start ChromeDriver
-      run: |
-        export DISPLAY=:99
-        chromedriver --url-base=/wd/hub &
-
+    
     - name: Restore dependencies
       run: dotnet restore
-
+    
     - name: Build
       run: dotnet build --no-restore
+    
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
 
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    - name: Run Smoke Tests
+      run: dotnet test --filter Category=Smoke
       env:
-        DISPLAY: :99
+       DOTNET_ENVIRONMENT: Test
 
-    - uses: actions/upload-artifact@v2
-      if: failure()
+    - name: List allure-results directory contents
+      run: ls -la allure-results
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: test-results
         path: TestResults
+
+    - name: Generate Allure Report
+      uses: simple-elf/allure-report-action@master
+      if: always()
+      with:
+        allure_results: allure-results
+        allure_report: allure-report
+        gh_pages: gh-pages
+        allure_history: allure-history
+        keep_reports: 20
+
+    - name: Deploy report to Github Pages
+      if: always()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: allure-history
