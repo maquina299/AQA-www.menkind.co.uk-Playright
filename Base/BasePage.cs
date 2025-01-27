@@ -10,7 +10,7 @@ namespace www.menkind.co.uk.Base
 
         static BasePage()
         {
-            // Initialize NLog
+            // Initialize NLog 
             var config = new XmlLoggingConfiguration("Config/NLog.config");
             LogManager.Configuration = config;
             Logger = LogManager.GetCurrentClassLogger();
