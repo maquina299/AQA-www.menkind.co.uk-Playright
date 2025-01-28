@@ -83,4 +83,6 @@ jobs:
       with:
         personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         publish_branch: gh-pages
-        publish_dir: allure-history
+        keep_files: true
+        publish_dir: allure-report
+        cname: maquina299.github.io
