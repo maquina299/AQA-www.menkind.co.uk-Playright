@@ -9,7 +9,7 @@ namespace www.menkind.co.uk.Tests
     [AllureNUnit]
     [AllureSuite("Homepage")]
     [Obsolete]
-    public class HomePageTests 
+    public class HomePageTests
     {
         private IWebDriver? _driver;
         private BasePage? _basePage;
@@ -17,32 +17,8 @@ namespace www.menkind.co.uk.Tests
 
 
         [SetUp]
-        //setup with enabling the images for the homepageloads test
+
         public void SetUp()
-        {
-            bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
-            InitializeDriverWithOptions(enableImages);
-            
-            _basePage = new BasePage(_driver);
-            _basePage.NavigateToUrl("https://www.menkind.co.uk/");
-            _basePage.HandleModals();
-        }
-
-        private void InitializeDriverWithOptions(bool enableImages)
-        {
-            ChromeOptions options = new();
-
-            if (!enableImages)
-            {
-                // Disable image loading
-                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-            }
-
-            _driver = new ChromeDriver(options);
-            _driver.Manage().Window.Maximize();
-        }
-        //standard ver of setup
-        /*public void SetUp()
         {           
             _basePage = new BasePage(null);
             _basePage.InitializeDriver();
@@ -51,9 +27,9 @@ namespace www.menkind.co.uk.Tests
             // Navigate to the homepage
             _basePage.NavigateToUrl("https://www.menkind.co.uk/");
             _basePage.HandleModals();
-        }*/
+        }
 
-
+       
 
         [Test]
         [Category("Smoke")]
