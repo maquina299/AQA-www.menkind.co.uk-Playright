@@ -63,11 +63,7 @@ namespace www.menkind.co.uk.Tests
         [AllureSeverity(SeverityLevel.critical)]
         [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
-        {
-            if (_driver == null)
-            {
-                throw new InvalidOperationException("WebDriver is not initialized (null).");
-            }
+        { 
             var homePage = new HomePageObject(_driver!);
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
