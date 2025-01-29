@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/allure-framework/allure-csharp/2.12.1/Allure.Net.Commons/Schemas/allureConfig.schema.json",
   "allure": {
-    "directory": "d:\\OneDrive\\C#\\www.menkind.co.uk - Copy\\allure-results",
+    "directory": "./allure-results",
     "links": [
       "https://example.org/{issue}",
       "https://example.org/{tms}"
