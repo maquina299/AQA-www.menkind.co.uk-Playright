@@ -24,8 +24,10 @@ namespace www.menkind.co.uk.Base
             if (_driver == null)
             {
                 ChromeOptions options = new();
-                options.AddArgument("--headless"); options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
-
+                // options.AddArgument("--headless"); options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
+               
+                // Disable image loading
+                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
                 _driver = new ChromeDriver(options);
                 _driver.Manage().Window.Maximize();
             }

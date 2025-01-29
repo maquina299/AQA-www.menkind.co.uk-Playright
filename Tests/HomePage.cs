@@ -6,6 +6,9 @@ using MenkindRegistrationTests.Pages;
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
+    // This will run all tests in this fixture in parallel
+    //[Parallelizable(ParallelScope.All)] 
+
     [AllureNUnit]
     [AllureSuite("Homepage")]
     [Obsolete]
@@ -18,7 +21,32 @@ namespace www.menkind.co.uk.Tests
 
         [SetUp]
 
+        //setup with enabling the images for the homepageloads test
         public void SetUp()
+        {
+            bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
+            InitializeDriverWithOptions(enableImages);
+            _basePage = new BasePage(_driver);
+
+            _basePage.NavigateToUrl(TestData.HomePageURL);
+            _basePage.HandleModals();
+        }
+
+        private void InitializeDriverWithOptions(bool enableImages)
+        {
+            ChromeOptions options = new();
+
+            if (!enableImages)
+            {
+                // Disable image loading
+                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
+            }
+
+            _driver = new ChromeDriver(options);
+            _driver.Manage().Window.Maximize();
+        }
+        //standard ver of setup
+        /*public void SetUp()
         {           
             _basePage = new BasePage(null);
             _basePage.InitializeDriver();
@@ -27,9 +55,7 @@ namespace www.menkind.co.uk.Tests
             // Navigate to the homepage
             _basePage.NavigateToUrl("https://www.menkind.co.uk/");
             _basePage.HandleModals();
-        }
-
-       
+        }*/
 
         [Test]
         [Category("Smoke")]
@@ -64,11 +90,11 @@ namespace www.menkind.co.uk.Tests
         public void LoginSuccessful()
         {
             Console.WriteLine(TestData.ValidEmail);
-            var homePage = new HomePageObject(_driver);
+            var homePage = new HomePageObject(_driver!);
 
             Logger.Debug("Executing LoginSuccessful test");
-
-            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", homePage.SignInLink);
+            homePage.SignIn();
+           // ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", homePage.SignInLink);
 
             Logger.Debug("Filling in the Testdata");
             

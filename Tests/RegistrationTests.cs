@@ -11,8 +11,8 @@ namespace www.menkind.co.uk.Tests
     [Obsolete]
     public class RegistrationTests
     {
-        private IWebDriver _driver;
-        private WebDriverWait _wait;
+        private IWebDriver? _driver;
+        private WebDriverWait? _wait;
         private BasePage? _basePage;
         private bool _testFailed = false;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -24,11 +24,10 @@ namespace www.menkind.co.uk.Tests
         {
             _basePage = new BasePage(null);
             _basePage.InitializeDriver();
-            _driver = _basePage.GetDriver();
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
-
+            _driver = _basePage.GetDriver(); // Initialize _driver
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5)); // Initialize _wait
             // Navigate to the registration page
-            _basePage.NavigateToUrl("https://www.menkind.co.uk/login.php?action=create_account");
+            _basePage.NavigateToUrl(TestData.RegistrationPageURL);
             _basePage.HandleModals();
         }
 
@@ -43,7 +42,8 @@ namespace www.menkind.co.uk.Tests
         {
             try
             {
-                var registrationPage = new RegistrationPageObjects(_driver);
+
+                var registrationPage = new RegistrationPageObjects(_driver!);
                 Logger.Info("Started to fill in required registration fields");
 
                 // Fill in all the registration fields
