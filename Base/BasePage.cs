@@ -4,9 +4,9 @@ namespace www.menkind.co.uk.Base
 {
     public class BasePage
     {
-        protected IWebDriver? _driver;
-
+        protected static IWebDriver? _driver;
         protected static readonly Logger Logger;
+        private static ChromeOptions _defaultOptions = new ChromeOptions();
 
         static BasePage()
         {
@@ -15,40 +15,64 @@ namespace www.menkind.co.uk.Base
             LogManager.Configuration = config;
             Logger = LogManager.GetCurrentClassLogger();
         }
-        public BasePage(IWebDriver? driver)
-        {
-            _driver = driver;
-        }
-        public void InitializeDriver()
+
+        public BasePage(bool enableImages = false)
         {
             if (_driver == null)
             {
-                ChromeOptions options = new();
-                // options.AddArgument("--headless"); options.AddArgument("--no-sandbox"); options.AddArgument("--disable-dev-shm-usage");
-               
-                // Disable image loading
-                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-                _driver = new ChromeDriver(options);
+                //Initialize only once
+                InitializeDriver(enableImages); 
+            }
+        }
+
+
+        private void InitializeDriver(bool enableImages)
+        {
+            Logger.Debug("Initializing WebDriver...");
+
+            // Configure Chrome options
+           // _defaultOptions.AddArgument("--headless");
+            _defaultOptions.AddArgument("--no-sandbox");
+            _defaultOptions.AddArgument("--disable-dev-shm-usage");
+            _defaultOptions.AddArgument("--remote-debugging-port=9222");
+
+            // Apply the image setting based on enableImages flag
+            if (!enableImages)
+            {
+                _defaultOptions.AddUserProfilePreference("profile.default_content_setting_values.images", 2); // Disable images
+                Logger.Debug("Images are disabled for this test.");
+            }
+
+            try
+            {
+                _driver = new ChromeDriver(_defaultOptions);
                 _driver.Manage().Window.Maximize();
+                Logger.Debug("WebDriver initialized successfully.");
             }
-        }
-        public IWebDriver GetDriver()
-        {
-            if (_driver == null)
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Driver is not initialized.");
+                Logger.Error($"Error initializing WebDriver: {ex.Message}");
+                throw;
             }
-            return _driver;
         }
+
+        public static IWebDriver GetDriver()
+        
+        {
+            return _driver ?? throw new InvalidOperationException("WebDriver is not initialized.");
+        }
+
         public void NavigateToUrl(string url)
         {
             if (_driver == null)
             {
                 throw new InvalidOperationException("WebDriver is not initialized.");
             }
+            Logger.Debug($"Navigating to {url}");
             _driver.Navigate().GoToUrl(url);
         }
-        public void TearDown()
+
+        public static void QuitDriver()
         {
             if (_driver != null)
             {

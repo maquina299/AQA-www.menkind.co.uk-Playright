@@ -22,11 +22,8 @@ namespace www.menkind.co.uk.Tests
 
         public void SetUp()
         {
-            _basePage = new BasePage(null);
-            _basePage.InitializeDriver();
-            _driver = _basePage.GetDriver(); // Initialize _driver
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5)); // Initialize _wait
-            // Navigate to the registration page
+            _driver = BasePage.GetDriver(); // Use shared WebDriver
+            _basePage = new BasePage();
             _basePage.NavigateToUrl(TestData.RegistrationPageURL);
             _basePage.HandleModals();
         }
@@ -43,7 +40,7 @@ namespace www.menkind.co.uk.Tests
             try
             {
 
-                var registrationPage = new RegistrationPageObjects(_driver!);
+                var registrationPage = new RegistrationPageObjects();
                 Logger.Info("Started to fill in required registration fields");
 
                 // Fill in all the registration fields
@@ -94,10 +91,7 @@ namespace www.menkind.co.uk.Tests
             }
             else
             {
-                _driver?.TakeScreenshot().SaveAsFile("success_screenshot.png");
-                // Close the browser
-                _basePage?.TearDown();
-                _driver?.Dispose();
+                BasePage.QuitDriver();
             }
         }
     }

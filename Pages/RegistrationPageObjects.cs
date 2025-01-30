@@ -4,8 +4,9 @@ namespace MenkindRegistrationTests.Pages
 {
     public class RegistrationPageObjects : BasePage
     {
-        public RegistrationPageObjects(IWebDriver driver) : base(driver)
+        public RegistrationPageObjects()
         {
+            _driver = BasePage.GetDriver(); // Use the existing WebDriver instance
         }
 
         // Локаторы

@@ -5,9 +5,9 @@ namespace www.menkind.co.uk.Pages
 {
     public class HomePageObject : BasePage
     {
-       
-        public HomePageObject(IWebDriver driver) : base(driver)
+        public HomePageObject()
         {
+            _driver = BasePage.GetDriver(); // Use the existing WebDriver instance
         }
 
         private IWebElement? LogoSelector => _driver?.FindElement(By.CssSelector("a.header__logo"));

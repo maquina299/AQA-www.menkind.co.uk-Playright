@@ -1,7 +1,6 @@
 ﻿using www.menkind.co.uk.Pages;
 using www.menkind.co.uk.Base;
-using OpenQA.Selenium.Support.Extensions;
-using MenkindRegistrationTests.Pages;
+
 
 namespace www.menkind.co.uk.Tests
 {
@@ -14,7 +13,6 @@ namespace www.menkind.co.uk.Tests
     [Obsolete]
     public class HomePageTests
     {
-        private IWebDriver? _driver;
         private BasePage? _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -25,37 +23,12 @@ namespace www.menkind.co.uk.Tests
         public void SetUp()
         {
             bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
-            InitializeDriverWithOptions(enableImages);
-            _basePage = new BasePage(_driver);
-
+            Logger.Debug("Enable image="+enableImages);
+            _basePage = new BasePage(enableImages); 
             _basePage.NavigateToUrl(TestData.HomePageURL);
             _basePage.HandleModals();
         }
 
-        private void InitializeDriverWithOptions(bool enableImages)
-        {
-            ChromeOptions options = new();
-
-            if (!enableImages)
-            {
-                // Disable image loading
-                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-            }
-
-            _driver = new ChromeDriver(options);
-            _driver.Manage().Window.Maximize();
-        }
-        //standard ver of setup
-        /*public void SetUp()
-        {           
-            _basePage = new BasePage(null);
-            _basePage.InitializeDriver();
-            _driver = _basePage.GetDriver();
-
-            // Navigate to the homepage
-            _basePage.NavigateToUrl("https://www.menkind.co.uk/");
-            _basePage.HandleModals();
-        }*/
 
         [Test]
         [Category("Smoke")]
@@ -66,7 +39,7 @@ namespace www.menkind.co.uk.Tests
         [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
         { 
-            var homePage = new HomePageObject(_driver!);
+            var homePage = new HomePageObject();
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
             {
@@ -90,7 +63,7 @@ namespace www.menkind.co.uk.Tests
         public void LoginSuccessful()
         {
             Console.WriteLine(TestData.ValidEmail);
-            var homePage = new HomePageObject(_driver!);
+            var homePage = new HomePageObject();
 
             Logger.Debug("Executing LoginSuccessful test");
             homePage.SignIn();
@@ -114,8 +87,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            _basePage?.TearDown();
-            _driver?.Dispose();
+            BasePage.QuitDriver(); // Quit driver after all tests
         }
     }
 }

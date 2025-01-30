@@ -8,51 +8,51 @@
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Drivers\**" />
-    <Compile Remove="NewFolder1\**" />
-    <EmbeddedResource Remove="Drivers\**" />
-    <EmbeddedResource Remove="NewFolder1\**" />
-    <None Remove="Drivers\**" />
-    <None Remove="NewFolder1\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Drivers\**" />
+		<Compile Remove="NewFolder1\**" />
+		<EmbeddedResource Remove="Drivers\**" />
+		<EmbeddedResource Remove="NewFolder1\**" />
+		<None Remove="Drivers\**" />
+		<None Remove="NewFolder1\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Allure.Net.Commons" Version="2.12.1" />
-    <PackageReference Include="Allure.NUnit" Version="2.12.1" />
-    <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="NLog" Version="5.3.4" />
-    <PackageReference Include="NLog.Schema" Version="5.3.4" />
-    <PackageReference Include="NUnit" Version="4.3.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-    <PackageReference Include="NUnit.Analyzers" Version="4.6.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Selenium.Support" Version="4.27.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.27.0" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="132.0.6834.8300" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Allure.Net.Commons" Version="2.12.1" />
+		<PackageReference Include="Allure.NUnit" Version="2.12.1" />
+		<PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="NLog.Schema" Version="5.3.4" />
+		<PackageReference Include="NUnit" Version="4.3.2" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="4.6.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="coverlet.collector" Version="6.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Selenium.Support" Version="4.27.0" />
+		<PackageReference Include="Selenium.WebDriver" Version="4.27.0" />
+		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="132.0.6834.8300" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="bin\Debug\net6.0\logs\" />
-    <Folder Include="logs\" />
-    <Folder Include="Screenshots\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="bin\Debug\net6.0\logs\" />
+		<Folder Include="logs\" />
+		<Folder Include="Screenshots\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="Config\Allure\allureConfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="Config\Allure\allureConfig.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Config\NLog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 	<ItemGroup>
 		<None Update="Config\Allure\allureConfig.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
