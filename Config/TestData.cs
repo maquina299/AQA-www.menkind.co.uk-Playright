@@ -7,7 +7,7 @@
             public static readonly string ValidPassword = "TestPassword123!";
             public static readonly string HomePageURL = "https://www.menkind.co.uk";
             public static readonly string RegistrationPageURL = "https://www.menkind.co.uk/login.php?action=create_account";
-
+            public static readonly string ProductPageURL = "https://www.menkind.co.uk/draft-wizard-ultrasonic-frothing-beer-dispenser";
 
 
     }

@@ -1,5 +1,4 @@
 ﻿using MenkindRegistrationTests.Pages;
-using www.menkind.co.uk.Base;
 
 namespace www.menkind.co.uk.Tests
 {
