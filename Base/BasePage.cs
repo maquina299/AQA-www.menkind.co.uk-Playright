@@ -32,7 +32,7 @@ namespace www.menkind.co.uk.Base
             Logger.Debug("Initializing WebDriver...");
 
             // Configure Chrome options
-           //_defaultOptions.AddArgument("--headless");
+           _defaultOptions.AddArgument("--headless");
             _defaultOptions.AddArgument("--no-sandbox");
             _defaultOptions.AddArgument("--disable-dev-shm-usage");
             _defaultOptions.AddArgument("--remote-debugging-port=9222");
