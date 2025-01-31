@@ -1,6 +1,4 @@
-﻿using www.menkind.co.uk.Base;
-
-
+﻿
 namespace www.menkind.co.uk.Pages
 {
     public class HomePageObject : BasePage

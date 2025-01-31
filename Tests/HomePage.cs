@@ -1,5 +1,4 @@
 ﻿using www.menkind.co.uk.Pages;
-using www.menkind.co.uk.Base;
 
 
 namespace www.menkind.co.uk.Tests
@@ -62,7 +61,7 @@ namespace www.menkind.co.uk.Tests
         [AllureTms("TMS-xx")]
         public void LoginSuccessful()
         {
-            Console.WriteLine(TestData.ValidEmail);
+            Logger.Debug(TestData.ValidEmail);
             var homePage = new HomePageObject();
 
             Logger.Debug("Executing LoginSuccessful test");

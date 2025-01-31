@@ -9,3 +9,4 @@ global using Allure.Net.Commons;
 global using NLog;
 global using NLog.Config;
 global using SeleniumExtras.WaitHelpers;
+global using www.menkind.co.uk.Base;
