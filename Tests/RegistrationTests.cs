@@ -92,6 +92,7 @@ namespace www.menkind.co.uk.Tests
             {
                 // Quit WebDriver to ensure proper cleanup
                 BasePage.QuitDriver();
+
                 Logger.Info("Test passed. WebDriver disposed.");
             }
         }
