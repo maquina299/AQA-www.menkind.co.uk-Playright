@@ -17,6 +17,7 @@ namespace www.menkind.co.uk.Base
         }
 
         public BasePage(bool enableImages = false)
+
         {
             if (_driver == null)
             {
