@@ -32,7 +32,8 @@ jobs:
         sudo apt-get install -y google-chrome-stable
 
     - name: Run Smoke Tests
-      run: dotnet test --filter Category=Smoke
+      run:  dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Smoke"
+
       env:
        DOTNET_ENVIRONMENT: Test
 
