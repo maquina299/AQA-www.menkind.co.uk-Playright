@@ -35,10 +35,10 @@ namespace www.menkind.co.uk.Base
             _defaultOptions.AddArgument("--no-sandbox");
             _defaultOptions.AddArgument("--disable-dev-shm-usage");
             _defaultOptions.AddArgument("--remote-debugging-port=9222");
-            string uniqueUserDataDir = $"/tmp/chrome-user-data-{Guid.NewGuid()}";
+           /* string uniqueUserDataDir = $"/tmp/chrome-user-data-{Guid.NewGuid()}";
             _defaultOptions.AddArgument($"--user-data-dir={uniqueUserDataDir}");
             Logger.Debug($"Using unique user-data directory: {uniqueUserDataDir}");
-
+*/
             // Apply the image setting based on enableImages flag
             if (!enableImages)
             {
