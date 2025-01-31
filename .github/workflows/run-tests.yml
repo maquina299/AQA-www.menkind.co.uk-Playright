@@ -37,10 +37,6 @@ jobs:
       env:
        DOTNET_ENVIRONMENT: Test
 
-    - name: Allur dir find
-      run:    ls -la
-            find . -type d -name "allure-results"
-
     - name: List allure-results directory contents
       run: ls -la allure-results
 
