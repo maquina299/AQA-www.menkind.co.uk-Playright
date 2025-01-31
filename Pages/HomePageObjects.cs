@@ -74,8 +74,8 @@ namespace www.menkind.co.uk.Pages
             return _driver?.Title ?? string.Empty;
         }
         //Login test part
-        public void EnterLoginEmail(string loginEmail) => _driver?.FindElement(LoginEmailField).SendKeys(loginEmail);
-        public void EnterLoginPass(string pass) => _driver?.FindElement(LoginPassField).SendKeys(pass);
+        public void EnterLoginEmail(string loginEmail) => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
+        public void EnterLoginPass(string pass) => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
         public bool IsUserLoggedIn()
         {
             try
@@ -93,7 +93,7 @@ namespace www.menkind.co.uk.Pages
             WaitForElementToBeVisible(SignInLink).Click();
         }
 
-        public void Submit() => _driver?.FindElement(SignInButton).Click();
+        public void Submit() => WaitForElementToBeVisible(SignInButton).Click();
 
 
     }
