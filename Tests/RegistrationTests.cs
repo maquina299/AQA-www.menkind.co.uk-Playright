@@ -1,6 +1,5 @@
 ﻿using MenkindRegistrationTests.Pages;
 using www.menkind.co.uk.Base;
-using OpenQA.Selenium.Support.Extensions;
 
 namespace www.menkind.co.uk.Tests
 {

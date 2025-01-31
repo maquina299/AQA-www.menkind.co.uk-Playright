@@ -32,7 +32,7 @@ namespace www.menkind.co.uk.Base
             Logger.Debug("Initializing WebDriver...");
 
             // Configure Chrome options
-           _defaultOptions.AddArgument("--headless");
+           //_defaultOptions.AddArgument("--headless");
             _defaultOptions.AddArgument("--no-sandbox");
             _defaultOptions.AddArgument("--disable-dev-shm-usage");
             _defaultOptions.AddArgument("--remote-debugging-port=9222");
@@ -76,6 +76,16 @@ namespace www.menkind.co.uk.Base
             _driver.Navigate().GoToUrl(url);
         }
 
+        public IWebElement WaitForElementToBeVisible(By locator, TimeSpan? timeout = null)
+        {
+            WebDriverWait wait = new(_driver, timeout ?? TimeSpan.FromSeconds(5));
+            return wait.Until(ExpectedConditions.ElementIsVisible(locator));
+        }
+
+
+
+
+
         public static void QuitDriver()
         {
             if (_driver != null)
@@ -97,8 +107,7 @@ namespace www.menkind.co.uk.Base
             try
             {
                 // Wait for Cookies modal to appear using ExpectedConditions
-                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(5));
-                var cookiesModal = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]")));
+                var cookiesModal = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]"));
 
                 if (cookiesModal.Displayed)
                 {
@@ -122,8 +131,7 @@ namespace www.menkind.co.uk.Base
             try
             {
                 // Wait for Discount modal to appear
-                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(5));
-                var discountModalCloseButton = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(text(), 'No Thanks. Close Form')]")));
+                var discountModalCloseButton = WaitForElementToBeVisible(By.XPath("//button[starts-with(text(), 'No Thanks.')]"));
 
                 if (discountModalCloseButton.Displayed)
                 {

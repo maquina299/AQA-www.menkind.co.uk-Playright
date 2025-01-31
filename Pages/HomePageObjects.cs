@@ -5,24 +5,27 @@ namespace www.menkind.co.uk.Pages
 {
     public class HomePageObject : BasePage
     {
-        public HomePageObject()
-        {
-            _driver = BasePage.GetDriver(); // Use the existing WebDriver instance
-        }
+        public HomePageObject() {}
+        private By LogoSelector => By.CssSelector("a.header__logo");
+        private By SignInLink => By.CssSelector("a.header__sign-in");
+        private By LoginEmailField => By.Id("login_email");
+        private By LoginPassField => By.Id("login_pass");
+        private By SignInButton => By.CssSelector("input[type='submit'][value='Sign In']");
+        private By AccountLink => By.CssSelector("a.header__sign-in[href = '/account.php']");
 
-        private IWebElement? LogoSelector => _driver?.FindElement(By.CssSelector("a.header__logo"));
-        public IWebElement? SignInLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
-        private IWebElement? LoginEmailField => _driver?.FindElement(By.Id("login_email"));
-        private IWebElement? LoginPassField => _driver?.FindElement(By.Id("login_pass"));
-        public IWebElement? SignInButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Sign In']"));
-        public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in[href = '/account.php']"));
-
+        /* private IWebElement? LogoSelector => _driver?.FindElement(By.CssSelector("a.header__logo"));
+         public IWebElement? SignInLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
+         private IWebElement? LoginEmailField => _driver?.FindElement(By.Id("login_email"));
+         private IWebElement? LoginPassField => _driver?.FindElement(By.Id("login_pass"));
+         public IWebElement? SignInButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Sign In']"));
+         public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in[href = '/account.php']"));
+        */
 
 
 
         public bool IsLogoDisplayed()
         {
-            return LogoSelector?.Displayed ?? false;
+            return _driver?.FindElement(LogoSelector).Displayed ?? false;
         }
 
         public bool IsLogoLoaded()
@@ -36,8 +39,7 @@ namespace www.menkind.co.uk.Pages
             try
             {
                 // Wait for the logo to be present
-                WebDriverWait wait = new(_driver, TimeSpan.FromSeconds(10));
-                IWebElement logo = wait.Until(driver => driver.FindElement(By.CssSelector("a.header__logo")));
+                IWebElement logo = WaitForElementToBeVisible(LogoSelector);
 
                 // Check if the logo image is loaded using JavaScript
                 string script = @"
@@ -72,18 +74,26 @@ namespace www.menkind.co.uk.Pages
             return _driver?.Title ?? string.Empty;
         }
         //Login test part
-        public void EnterLoginEmail(string loginEmail) => LoginEmailField?.SendKeys(loginEmail);
-        public void EnterLoginPass(string pass) => LoginPassField?.SendKeys(pass);
+        public void EnterLoginEmail(string loginEmail) => _driver?.FindElement(LoginEmailField).SendKeys(loginEmail);
+        public void EnterLoginPass(string pass) => _driver?.FindElement(LoginPassField).SendKeys(pass);
         public bool IsUserLoggedIn()
         {
-            return AccountLink?.Displayed ?? false;
-        }
-        public void SignIn()
-        {
-            SignInLink?.Click();
+            try
+            {
+                return WaitForElementToBeVisible(AccountLink).Displayed;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
         }
 
-        public void Submit() => SignInButton?.Click();
+        public void SignIn()
+        {
+            WaitForElementToBeVisible(SignInLink).Click();
+        }
+
+        public void Submit() => _driver?.FindElement(SignInButton).Click();
 
 
     }
