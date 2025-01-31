@@ -36,7 +36,7 @@ namespace www.menkind.co.uk.Base
             _defaultOptions.AddArgument("--disable-dev-shm-usage");
             _defaultOptions.AddArgument("--remote-debugging-port=9222");
             string uniqueUserDataDir = $"/tmp/chrome-user-data-{Guid.NewGuid()}";
-            options.AddArgument($"--user-data-dir={uniqueUserDataDir}");
+            _defaultOptions.AddArgument($"--user-data-dir={uniqueUserDataDir}");
             Logger.Debug($"Using unique user-data directory: {uniqueUserDataDir}");
 
             // Apply the image setting based on enableImages flag
