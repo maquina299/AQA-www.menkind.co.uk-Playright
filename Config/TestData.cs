@@ -8,6 +8,8 @@
             public static readonly string HomePageURL = "https://www.menkind.co.uk";
             public static readonly string RegistrationPageURL = "https://www.menkind.co.uk/login.php?action=create_account";
             public static readonly string ProductPageURL = "https://www.menkind.co.uk/draft-wizard-ultrasonic-frothing-beer-dispenser";
+            public static readonly string GetCartSummary = "https://www.menkind.co.uk/api/storefront/cart-summary";
+
 
 
     }
