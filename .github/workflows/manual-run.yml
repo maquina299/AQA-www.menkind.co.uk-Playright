@@ -11,7 +11,8 @@ on:
         options:
         - all
         - homepage
-        - registration
+        - registration page
+        - product page  
         - smoke
         - regression
 permissions:
@@ -47,6 +48,8 @@ jobs:
           dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~HomePage"
         elif [ "${{ github.event.inputs.test_suite }}" = "registration" ]; then
           dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Registration"
+        elif [ "${{ github.event.inputs.test_suite }}" = "product" ]; then
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Product"
         elif [ "${{ github.event.inputs.test_suite }}" = "smoke" ]; then
           dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Smoke"
         elif [ "${{ github.event.inputs.test_suite }}" = "regression" ]; then
