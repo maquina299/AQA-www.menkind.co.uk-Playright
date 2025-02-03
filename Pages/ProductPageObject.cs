@@ -13,6 +13,9 @@ namespace www.menkind.co.uk.Pages
         private By AddToBasketButton => By.Id("form-action-addToCart");
         private By BasketIcon => By.CssSelector("span.countPill.cart-quantity.countPill--positive"); // Icon showing item count
         private By SubmitAdding => By.XPath("//a[contains(@class, 'button--primaryGhost') and contains(text(), 'Continue Shopping')]"); // Icon showing item count
+        private By OOSMessage => By.XPath("//h3[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'out of stock')]");
+        //Out of stock messgae
+        private By PriceAmount => By.XPath("span.product-price__amount");
 
         // Methods
         public void AddToBasket()
@@ -41,6 +44,14 @@ namespace www.menkind.co.uk.Pages
                 Logger.Warn("Cart count did not update in time.");
                 return false;
             }
+        }
+        public bool IsOOSMessage()
+        {
+        return WaitForElementToBeVisible(OOSMessage).Displayed;
+        }
+        public bool IsPriceAmountPresent()
+        {
+            return _driver.FindElements(PriceAmount).Count > 0;
         }
         // Fetch and validate the cart-summary API response
         public CartSummaryResponse GetCartSummary()
