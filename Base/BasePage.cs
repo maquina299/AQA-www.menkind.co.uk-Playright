@@ -1,4 +1,6 @@
-﻿using OpenQA.Selenium.Support.Extensions;
+﻿using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support.Extensions;
+using System.Runtime.InteropServices;
 
 namespace www.menkind.co.uk.Base
 {
@@ -7,6 +9,9 @@ namespace www.menkind.co.uk.Base
         protected static IWebDriver? _driver;
         protected static readonly Logger Logger;
         private ChromeOptions _defaultOptions = new ChromeOptions();
+        private static By DiscountIconCloseButton => By.ClassName("klaviyo-close-form");
+        private static By CookiesModal => By.XPath("//button[contains(text(), 'Allow all Cookies')]");
+        private static By CookiesAcceptButton => By.XPath("//button[contains(text(), 'Allow all Cookies')]");
 
         static BasePage()
         {
@@ -30,14 +35,19 @@ namespace www.menkind.co.uk.Base
         private void InitializeDriver(bool enableImages)
         {
             Logger.Debug("Initializing WebDriver...");
+                if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+    {
+        Logger.Info("Running in GitHub Actions - Using CI settings.");
+        _defaultOptions.AddArgument("--headless");  // Run in headless mode in GitHub
+        _defaultOptions.AddArgument("--no-sandbox");
+        _defaultOptions.AddArgument("--disable-dev-shm-usage");
+    }
+    else
+    {
+        Logger.Info("Running locally - Using local settings.");
+        _defaultOptions.AddArgument("--start-maximized");  // Open full screen in local
+    }
 
-            // Configure Chrome options
-
-           _defaultOptions.AddArgument("--headless");_defaultOptions.AddArgument("--no-sandbox");_defaultOptions.AddArgument("--disable-dev-shm-usage");_defaultOptions.AddArgument("--remote-debugging-port=9222");
-           /* string uniqueUserDataDir = $"/tmp/chrome-user-data-{Guid.NewGuid()}";
-            _defaultOptions.AddArgument($"--user-data-dir={uniqueUserDataDir}");
-            Logger.Debug($"Using unique user-data directory: {uniqueUserDataDir}");
-*/
             // Apply the image setting based on enableImages flag
             if (!enableImages)
             {
@@ -108,15 +118,9 @@ namespace www.menkind.co.uk.Base
             }
             try
             {
-                // Wait for Cookies modal to appear using ExpectedConditions
-                var cookiesModal = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]"));
-
-                if (cookiesModal.Displayed)
-                {
-                    var acceptCookiesButton = cookiesModal.FindElement(By.XPath("//button[contains(text(), 'Allow all Cookies')]"));
-                    acceptCookiesButton.Click();
-                    Logger.Info("Cookies modal closed.");
-                }
+             WaitForElementToBeClickable(CookiesAcceptButton).Click();
+             Logger.Info("Cookies modal closed.");
+                
             }
             catch (WebDriverTimeoutException)
             {
@@ -126,11 +130,17 @@ namespace www.menkind.co.uk.Base
             {
                 Logger.Error($"Error while handling cookies modal: {ex.Message}");
             }
-            // Scroll down to the end of the page to make the discount modal appears
-            Logger.Info("Scrolling down to the end of the page");
-            _driver.ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
 
             try
+            {
+                WaitForElementToBeClickable(DiscountIconCloseButton).Click();
+                Logger.Info("Discount close button clicked.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Discount icon close button not found.");
+            }
+           /* try
             {
                 // Wait for Discount modal to appear
                 var discountModalCloseButton = WaitForElementToBeVisible(By.XPath("//button[starts-with(text(), 'No Thanks.')]"));
@@ -148,7 +158,7 @@ namespace www.menkind.co.uk.Base
             catch (Exception ex)
             {
                 Logger.Error($"Error while handling discount modal: {ex.Message}");
-            }
+            }*/
         }
 
       

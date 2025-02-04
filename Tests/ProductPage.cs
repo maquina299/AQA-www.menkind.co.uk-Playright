@@ -29,9 +29,10 @@ namespace www.menkind.co.uk.Tests
             var productPage = new ProductPageObject();
 
             Logger.Debug("Starting test: AddItemToCart_ShouldUpdateCartIcon");
-
+            #region test
             // Step 1: Add item to basket
             productPage.AddToBasket();
+            #endregion
             // Step 2: Verify cart icon updates
             Assert.That(productPage.IsCartUpdated(), Is.True, "Cart icon did not update to show 1 item.");
             // Step 3: Verify the item in the cart-summary API
@@ -45,10 +46,11 @@ namespace www.menkind.co.uk.Tests
         [Category("Regression")]
         [AllureSubSuite("Regression")]
         public void SoldItem_ShouldCauseOOSmessage()
+            //OOS message should be displayed, price amount is absent, add to the cart button is disabled with the Out of Stock label
         {
             if (_basePage == null)
             {
-                _basePage = new BasePage(false);  // Ensure _basePage is initialized
+                _basePage = new BasePage(false);
             }
             _basePage.NavigateToUrl(TestData.SoldProductPageURL);
 
@@ -58,6 +60,9 @@ namespace www.menkind.co.uk.Tests
             {
                 Assert.That(productPage.IsOOSMessage(), Is.True, "OOS is not displayed");
                 Assert.That(productPage.IsPriceAmountPresent(), Is.False, "Price amount is displayed");
+                Assert.That(productPage.IsAddToCartDisabled(), Is.True, "Add to Cart button is not disabled");
+                Assert.That(productPage.GetAddToCartText(), Does.Contain("Out of Stock"), "Add to Cart button does not show 'Out of Stock'");
+
             });
             Logger.Debug("Test passed: OOS is displayed.");
         }
