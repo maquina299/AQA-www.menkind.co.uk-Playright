@@ -21,8 +21,8 @@ namespace www.menkind.co.uk.Tests
         }
 
         [Test]
-        [Category("Search")]
-        [AllureSubSuite("Search Frame")]
+        [Category("Regression")]
+        [AllureSubSuite("Regression")]
         public void SearchFrame_ShouldDisplayResults_CloseAfterOutsideClick()
         {
             var searchPage = new Search();

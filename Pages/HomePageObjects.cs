@@ -15,15 +15,6 @@ namespace www.menkind.co.uk.Pages
         public void EnterLoginEmail(string loginEmail) => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
         public void EnterLoginPass(string pass) => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
 
-        /* private IWebElement? LogoSelector => _driver?.FindElement(By.CssSelector("a.header__logo"));
-         public IWebElement? SignInLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
-         private IWebElement? LoginEmailField => _driver?.FindElement(By.Id("login_email"));
-         private IWebElement? LoginPassField => _driver?.FindElement(By.Id("login_pass"));
-         public IWebElement? SignInButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Sign In']"));
-         public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in[href = '/account.php']"));
-        */
-
-
 
         public bool IsLogoDisplayed()
         {
