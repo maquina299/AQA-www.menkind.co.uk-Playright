@@ -1,5 +1,4 @@
 ﻿using www.menkind.co.uk.Pages;
-using System.Collections.Generic;
 
 
 namespace www.menkind.co.uk.Tests
@@ -26,7 +25,7 @@ namespace www.menkind.co.uk.Tests
         [AllureSubSuite("Add to Cart")]
         public void AddItemToCart_ShouldUpdateCartIcon()
         {
-            var productPage = new ProductPageObject();
+            var productPage = new ProductPageObject(_basePage!.Driver);
 
             Logger.Debug("Starting test: AddItemToCart_ShouldUpdateCartIcon");
             #region test
@@ -54,7 +53,7 @@ namespace www.menkind.co.uk.Tests
             }
             _basePage.NavigateToUrl(TestData.SoldProductPageURL);
 
-            var productPage = new ProductPageObject();
+            var productPage = new ProductPageObject(_basePage.Driver);
             Logger.Debug("Starting test: SoldItem_ShouldCauseOOSMessage");
             Assert.Multiple(() =>
             {
@@ -70,7 +69,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            BasePage.QuitDriver();
+            _basePage?.Driver.Dispose();
         }
     }
 }

@@ -1,33 +1,33 @@
-﻿using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Support.Extensions;
-
+﻿
 namespace www.menkind.co.uk.Base
 {
     public class BasePage
     {
-        protected static IWebDriver? _driver;
-        protected static readonly Logger Logger;
+        private IWebDriver _driver;
+        protected WebDriverWait _wait;
+        protected static readonly Logger Logger; // CHANGED: Single static Logger declaration
         private ChromeOptions _defaultOptions = new ChromeOptions();
 
-        // Locators
-        private static readonly By CookiesAcceptButton = By.XPath("//button[contains(text(), 'Allow all Cookies')]");
-        private static readonly By DiscountIconCloseButton = By.ClassName("klaviyo-close-form");
-        private static readonly By AlternativeDiscountCloseButton = By.XPath("//button[contains(text(), 'No Thanks')]");
-
+        // Static constructor to initialize the Logger configuration
         static BasePage()
         {
-            // Initialize NLog
             var config = new XmlLoggingConfiguration("Config/NLog.config");
             LogManager.Configuration = config;
             Logger = LogManager.GetCurrentClassLogger();
         }
 
+        // CHANGED: Constructor that creates a new WebDriver instance with the enableImages option.
         public BasePage(bool enableImages = false)
         {
-            if (_driver == null)
-            {
-                InitializeDriver(enableImages);
-            }
+            InitializeDriver(enableImages);
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+        }
+
+        // CHANGED: Overloaded constructor to use an existing WebDriver instance (for page objects).
+        public BasePage(IWebDriver driver)
+        {
+            _driver = driver ?? throw new ArgumentNullException(nameof(driver));
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
         private void InitializeDriver(bool enableImages)
@@ -37,14 +37,14 @@ namespace www.menkind.co.uk.Base
             if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
             {
                 Logger.Info("Running in GitHub Actions - Using CI settings.");
-                _defaultOptions.AddArgument("--headless");  // Headless mode for CI
+                _defaultOptions.AddArgument("--headless");
                 _defaultOptions.AddArgument("--no-sandbox");
                 _defaultOptions.AddArgument("--disable-dev-shm-usage");
             }
             else
             {
                 Logger.Info("Running locally - Using local settings.");
-                _defaultOptions.AddArgument("--start-maximized");  // Fullscreen for local tests
+                _defaultOptions.AddArgument("--start-maximized");
             }
 
             if (!enableImages)
@@ -65,35 +65,38 @@ namespace www.menkind.co.uk.Base
             }
         }
 
-        public static IWebDriver GetDriver()
-        {
-            return _driver ?? throw new InvalidOperationException("WebDriver is not initialized.");
-        }
+        // CHANGED: Expose the private _driver so that page objects can use it.
+        public IWebDriver Driver => _driver;
 
         public void NavigateToUrl(string url)
         {
-            if (_driver == null) throw new InvalidOperationException("WebDriver is not initialized.");
+            if (_driver == null)
+                throw new InvalidOperationException("WebDriver is not initialized.");
+
             Logger.Debug($"Navigating to {url}");
             _driver.Navigate().GoToUrl(url);
         }
 
         public IWebElement WaitForElementToBeVisible(By locator, TimeSpan? timeout = null)
         {
-            WebDriverWait wait = new(_driver, timeout ?? TimeSpan.FromSeconds(5));
-            return wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            return new WebDriverWait(_driver, timeout ?? TimeSpan.FromSeconds(5))
+                        .Until(ExpectedConditions.ElementIsVisible(locator));
         }
 
         public IWebElement WaitForElementToBeClickable(By locator, TimeSpan? timeout = null)
         {
-            WebDriverWait wait = new(_driver, timeout ?? TimeSpan.FromSeconds(5));
-            return wait.Until(ExpectedConditions.ElementToBeClickable(locator));
+            return new WebDriverWait(_driver, timeout ?? TimeSpan.FromSeconds(3))
+                        .Until(ExpectedConditions.ElementToBeClickable(locator));
         }
 
-        public static void QuitDriver()
+        public void Dispose()
         {
-            _driver?.Quit();
-            _driver?.Dispose();
-            _driver = null;
+            if (_driver != null)
+            {
+                _driver.Quit();
+                _driver.Dispose();
+                _driver = null;
+            }
         }
 
         public void HandleModals()
@@ -106,8 +109,9 @@ namespace www.menkind.co.uk.Base
 
             try
             {
-            WaitForElementToBeVisible(CookiesAcceptButton).Click();
-            Logger.Info("Cookies modal closed.");
+                // CHANGED: Using inline locator for cookies accept button.
+                WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]")).Click();
+                Logger.Info("Cookies modal closed.");
             }
             catch (WebDriverTimeoutException)
             {
@@ -120,61 +124,21 @@ namespace www.menkind.co.uk.Base
 
             try
             {
-                WaitForElementToBeVisible(DiscountIconCloseButton).Click();
+                // CHANGED: Using inline locator for discount modal close button.
+                WaitForElementToBeVisible(By.ClassName("klaviyo-close-form")).Click();
             }
             catch (Exception ex)
             {
-                Logger.Warn("No discount modal icon or failed to close it: {ex.Message}");
+                Logger.Warn($"No discount modal icon or failed to close it: {ex.Message}");
                 try
                 {
-                    WaitForElementToBeVisible(AlternativeDiscountCloseButton).Click();
+                    WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'No Thanks')]")).Click();
                 }
-
                 catch (Exception exi)
                 {
                     Logger.Warn($"No discount modal found or failed to close it: {ex.Message}");
                 }
             }
-
         }
-
-        /* 
-         public void HandleModals()
-
-         {
-         if (_driver == null)
-         {
-          Logger.Debug("WebDriver is not initialized.");
-          return;
-         }
-         try
-         {
-          WaitForElementToBeClickable(CookiesAcceptButton).Click();
-          Logger.Info("Cookies modal closed.");
-
-         }
-         catch (WebDriverTimeoutException)
-         {
-             Logger.Warn("Cookies modal not found within the wait time.");
-         }
-         catch (Exception ex)
-         {
-             Logger.Error($"Error while handling cookies modal: {ex.Message}");
-         }
-
-         try
-         {
-             WaitForElementToBeClickable(DiscountIconCloseButton).Click();
-             Logger.Info("Discount close button clicked.");
-         }
-         catch (WebDriverTimeoutException)
-         {
-             Logger.Warn("Discount icon close button not found.");
-         }
-         catch (Exception ex)
-         {
-             Logger.Error($"Error while handling discount modal: {ex.Message}");
-         }*/
     }
-    
 }

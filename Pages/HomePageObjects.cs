@@ -1,29 +1,35 @@
-﻿
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
 namespace www.menkind.co.uk.Pages
 {
     public class HomePageObject : BasePage
     {
-        public HomePageObject() {}
+        // CHANGED: Use the overloaded BasePage constructor that accepts an existing driver.
+        public HomePageObject(IWebDriver driver) : base(driver) { }
+
         private By LogoSelector => By.CssSelector("a.header__logo");
         private By SignInLink => By.CssSelector("a.header__sign-in");
         private By LoginEmailField => By.Id("login_email");
         private By LoginPassField => By.Id("login_pass");
         private By SignInButton => By.CssSelector("input[type='submit'][value='Sign In']");
-        private By AccountLink => By.CssSelector("a.header__sign-in[href = '/account.php']");
-        public void EnterLoginEmail(string loginEmail) => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
-        public void EnterLoginPass(string pass) => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
+        private By AccountLink => By.CssSelector("a.header__sign-in[href='/account.php']");
 
+        public void EnterLoginEmail(string loginEmail)
+            => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
+
+        public void EnterLoginPass(string pass)
+            => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
 
         public bool IsLogoDisplayed()
         {
-            return _driver?.FindElement(LogoSelector).Displayed ?? false;
+            // CHANGED: Use the public Driver property instead of the private _driver.
+            return Driver.FindElement(LogoSelector).Displayed;
         }
 
         public bool IsLogoLoaded()
         {
-            if (_driver == null)
+            if (Driver == null)
             {
                 Logger.Error("WebDriver is not initialized.");
                 return false;
@@ -31,17 +37,15 @@ namespace www.menkind.co.uk.Pages
 
             try
             {
-                // Wait for the logo to be present
                 IWebElement logo = WaitForElementToBeVisible(LogoSelector);
 
-                // Check if the logo image is loaded using JavaScript
                 string script = @"
                     var img = arguments[0].querySelector('img');
                     return img && img.complete && 
                            typeof img.naturalWidth != 'undefined' && 
                            img.naturalWidth > 0;
                 ";
-                bool isLoaded = (bool)((IJavaScriptExecutor)_driver).ExecuteScript(script, logo);
+                bool isLoaded = (bool)((IJavaScriptExecutor)Driver).ExecuteScript(script, logo);
 
                 if (!isLoaded)
                 {
@@ -64,9 +68,10 @@ namespace www.menkind.co.uk.Pages
 
         public string GetTitle()
         {
-            return _driver?.Title ?? string.Empty;
+            // CHANGED: Use Driver property.
+            return Driver.Title;
         }
-        //Login test part
+
         public bool IsUserLoggedIn()
         {
             try
@@ -78,12 +83,15 @@ namespace www.menkind.co.uk.Pages
                 return false;
             }
         }
+
         public void SignIn()
         {
             WaitForElementToBeClickable(SignInLink).Click();
         }
-        public void Submit() => WaitForElementToBeVisible(SignInButton).Click();
 
-
+        public void Submit()
+        {
+            WaitForElementToBeVisible(SignInButton).Click();
+        }
     }
 }

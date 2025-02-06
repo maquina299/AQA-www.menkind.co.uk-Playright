@@ -4,29 +4,21 @@ namespace MenkindRegistrationTests.Pages
 {
     public class RegistrationPageObjects : BasePage
     {
-        public RegistrationPageObjects()
-        {
-            _driver = BasePage.GetDriver(); // Use the existing WebDriver instance
-        }
-
-        // Локаторы
-
-        private IWebElement? EmailField => _driver?.FindElement(By.Id("FormField_1_input"));
-        private IWebElement? PasswordField => _driver?.FindElement(By.Id("FormField_2_input"));
-        private IWebElement? ConfirmPasswordField => _driver?.FindElement(By.Id("FormField_3_input"));
-        private IWebElement? FirstNameField => _driver?.FindElement(By.Id("FormField_4_input"));
-        private IWebElement? LastNameField => _driver?.FindElement(By.Id("FormField_5_input"));
-        private IWebElement? PhoneNumField => _driver?.FindElement(By.Id("FormField_7_input"));
-        private IWebElement? PostCodeField => _driver?.FindElement(By.Id("FormField_13_input"));
-        private IWebElement? AddressField => _driver?.FindElement(By.Id("FormField_8_input"));
-        private IWebElement? CityField => _driver?.FindElement(By.Id("FormField_10_input"));
-        private IWebElement? CountryField => _driver?.FindElement(By.Id("FormField_11_select"));
-        private IWebElement? CountyField => _driver?.FindElement(By.Id("FormField_12_input"));
-
-        private IWebElement? SubmitButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Create Account']"));
-
-        public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
-
+        public RegistrationPageObjects(IWebDriver driver) : base(driver) { }
+        private By SuccessMessage => By.CssSelector("h1.page-heading.classyunicodedone");
+        private IWebElement? EmailField => Driver.FindElement(By.Id("FormField_1_input"));
+        private IWebElement? PasswordField => Driver.FindElement(By.Id("FormField_2_input"));
+        private IWebElement? ConfirmPasswordField => Driver?.FindElement(By.Id("FormField_3_input"));
+        private IWebElement? FirstNameField => Driver?.FindElement(By.Id("FormField_4_input"));
+        private IWebElement? LastNameField => Driver?.FindElement(By.Id("FormField_5_input"));
+        private IWebElement? PhoneNumField => Driver?.FindElement(By.Id("FormField_7_input"));
+        private IWebElement? PostCodeField => Driver?.FindElement(By.Id("FormField_13_input"));
+        private IWebElement? AddressField => Driver?.FindElement(By.Id("FormField_8_input"));
+        private IWebElement? CityField => Driver?.FindElement(By.Id("FormField_10_input"));
+        private IWebElement? CountryField => Driver?.FindElement(By.Id("FormField_11_select"));
+        private IWebElement? CountyField => Driver?.FindElement(By.Id("FormField_12_input"));
+        private IWebElement? SubmitButton => Driver?.FindElement(By.CssSelector("input[type='submit'][value='Create Account']"));
+        public IWebElement? AccountLink => Driver?.FindElement(By.CssSelector("a.header__sign-in"));
         public bool IsUserLoggedIn()
         {
             return AccountLink?.Displayed ?? false;
@@ -57,5 +49,13 @@ namespace MenkindRegistrationTests.Pages
 
         public void Submit() => SubmitButton?.Click();
         public string GenerateUniqueEmail() => $"testuser_{Guid.NewGuid()}@example.com";
+        public bool IsSuccessMessageVisible()
+        {
+            return WaitForElementToBeVisible(SuccessMessage).Displayed;
+        }
+        public string GetSuccessMessageText()
+        {
+            return WaitForElementToBeVisible(SuccessMessage).Text;
+        }
     }
 }

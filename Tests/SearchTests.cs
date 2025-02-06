@@ -1,5 +1,4 @@
 ﻿using www.menkind.co.uk.Pages;
-using www.menkind.co.uk.Base;
 
 namespace www.menkind.co.uk.Tests
 {
@@ -15,7 +14,7 @@ namespace www.menkind.co.uk.Tests
         [SetUp]
         public void SetUp()
         {
-            _basePage = new BasePage(false);
+            _basePage = new BasePage( false);
             _basePage.NavigateToUrl(TestData.HomePageURL);
             _basePage.HandleModals();
         }
@@ -25,7 +24,7 @@ namespace www.menkind.co.uk.Tests
         [AllureSubSuite("Regression")]
         public void SearchFrame_ShouldDisplayResults_CloseAfterOutsideClick()
         {
-            var searchPage = new Search();
+            var searchPage = new Search(_basePage!.Driver);
 
             Logger.Debug("Starting test: SearchBox_ShouldDisplayResults_WhenSearchingForBeer");
 
@@ -54,7 +53,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            BasePage.QuitDriver();
+        _basePage!.Dispose();
         }
     }
 }

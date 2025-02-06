@@ -6,7 +6,7 @@ namespace www.menkind.co.uk.Pages
 {
     public class Search : BasePage
     {
-        public Search() { }
+        public Search(IWebDriver driver) : base(driver) { }
 
         // Locators
         private By SearchBox => By.Id("nav-quick-search");
@@ -21,7 +21,7 @@ namespace www.menkind.co.uk.Pages
         // Methods
         public void EnterSearchQuery(string query)
         {
-            Actions actions = new Actions(_driver);
+            Actions actions = new Actions(Driver);
             actions.SendKeys(Keys.Home).Perform();
             var searchBox = WaitForElementToBeVisible(SearchBox);
             searchBox.Clear();
@@ -35,23 +35,27 @@ namespace www.menkind.co.uk.Pages
             try
             {
                 Logger.Debug("Waiting for search results frame to appear...");
-                return WaitForElementToBeVisible(SearchResultsFrame).Displayed;
-                Logger.Debug("Search results frame appeared.");
+                if (WaitForElementToBeVisible(SearchResultsFrame).Displayed)
+                {
+                    Logger.Debug("Search results frame appeared.");
+                    return true;
+                }
+                else return false;
             }
             catch (WebDriverTimeoutException)
             {
                 Logger.Warn("Search results frame did not appear within the expected time.");
                 return false;
             }
-            /*var frames = _driver.FindElements(SearchResultsFrame);
+            /*var frames = Driver.FindElements(SearchResultsFrame);
             return frames.Count > 0 && frames[0].Displayed;*/
         }
 
 
         public bool AreTabsPresent()
         {
-            bool productsTabExists = _driver.FindElements(ProductsTab).Count > 0;
-            bool nonProductsTabExists = _driver.FindElements(NonProductsTab).Count > 0;
+            bool productsTabExists = Driver.FindElements(ProductsTab).Count > 0;
+            bool nonProductsTabExists = Driver.FindElements(NonProductsTab).Count > 0;
 
             if (!productsTabExists) Logger.Warn("Products section is missing.");
             if (!nonProductsTabExists) Logger.Warn("Non-products section is missing.");
@@ -64,8 +68,8 @@ namespace www.menkind.co.uk.Pages
             List<string> invalidResults = new();
 
             // Locators for search results in both sections
-            var searchResultLinks = _driver.FindElements(By.CssSelector("ul li a.quick-search__results-link")); // Non-product results
-            var productTitles = _driver.FindElements(By.CssSelector("ul.products li.product h3.card-title a")); // Product results
+            var searchResultLinks = Driver.FindElements(By.CssSelector("ul li a.quick-search__results-link")); // Non-product results
+            var productTitles = Driver.FindElements(By.CssSelector("ul.products li.product h3.card-title a")); // Product results
 
             // Combine all results into one list
             var allResults = searchResultLinks.Concat(productTitles).ToList();
@@ -104,14 +108,14 @@ namespace www.menkind.co.uk.Pages
         {
             try
             {
-                var overlay = _driver.FindElement(PageBackground);
-                ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", overlay);
+                var overlay = Driver.FindElement(PageBackground);
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", overlay);
                 Logger.Debug("Clicked overlay using JavaScript.");
             }
             catch (NoSuchElementException)
             {
                 Logger.Warn("Search overlay not found. Clicking the body instead.");
-                _driver.FindElement(PageBackgroundAlt).Click();
+                Driver.FindElement(PageBackgroundAlt).Click();
             }
         }
     }  
