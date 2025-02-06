@@ -17,12 +17,7 @@ namespace www.menkind.co.uk.Tests
         public void SetUp()
         {
             bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
-            Logger.Debug("Enable image=" + enableImages);
-
-            // CHANGED: Instantiate BasePage, which now creates its own WebDriver instance.
-            _basePage = new BasePage(enableImages);
-            _basePage.NavigateToUrl(TestData.HomePageURL);
-            _basePage.HandleModals();
+            _basePage = DriverFactory.SetupDriver(enableImages); // ✅ Fully handled in DriverFactory
         }
 
         [Test]
@@ -79,8 +74,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            // CHANGED: Dispose BasePage to quit and dispose the WebDriver.
-            _basePage.Dispose();
+            DriverFactory.DisposeCurrentDriver(); // ✅ Each test disposes its own driver only
         }
     }
 }

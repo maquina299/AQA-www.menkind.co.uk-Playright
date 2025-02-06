@@ -1,4 +1,5 @@
 ﻿using www.menkind.co.uk.Pages;
+using www.menkind.co.uk.Base;
 
 namespace www.menkind.co.uk.Tests
 {
@@ -8,15 +9,13 @@ namespace www.menkind.co.uk.Tests
     [Obsolete]
     public class SearchTests
     {
-        private BasePage? _basePage;
+        private BasePage _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [SetUp]
         public void SetUp()
         {
-            _basePage = new BasePage( false);
-            _basePage.NavigateToUrl(TestData.HomePageURL);
-            _basePage.HandleModals();
+            _basePage = DriverFactory.SetupDriver(false, TestData.HomePageURL); // ✅ Centralized driver setup
         }
 
         [Test]
@@ -24,8 +23,7 @@ namespace www.menkind.co.uk.Tests
         [AllureSubSuite("Regression")]
         public void SearchFrame_ShouldDisplayResults_CloseAfterOutsideClick()
         {
-            var searchPage = new Search(_basePage!.Driver);
-
+            var searchPage = new Search(_basePage.Driver);
             Logger.Debug("Starting test: SearchBox_ShouldDisplayResults_WhenSearchingForBeer");
 
             // Step 1: Enter search query "beer"
@@ -41,19 +39,18 @@ namespace www.menkind.co.uk.Tests
             Assert.That(searchPage.AreSearchResultsRelevant("beer"), "Search results do not contain the expected keyword.");
             Logger.Debug("Test passed: Search frame displayed relevant results successfully.");
 
+            // Step 5: Close the search frame by clicking outside
             Logger.Debug("Starting test: Search frame is closed after clicking outside the frame.");
-
             searchPage.ClickOutsideSearchFrame();
 
             Assert.That(searchPage.IsSearchFrameVisible(), Is.False, "Failed to click outside search box.");
             Logger.Debug("Test passed: Search frame is closed after clicking outside the frame.");
-
         }
 
         [TearDown]
         public void TearDown()
         {
-        _basePage!.Dispose();
+            DriverFactory.DisposeAllDrivers(); // ✅ Centralized WebDriver cleanup
         }
     }
 }
