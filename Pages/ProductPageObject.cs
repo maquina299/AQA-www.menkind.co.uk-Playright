@@ -45,13 +45,16 @@ namespace www.menkind.co.uk.Pages
                 return false;
             }
         }
-        public bool IsOOSMessage()
-        {
-        return WaitForElementToBeVisible(OOSMessage).Displayed;
-        }
+
+        /* public bool IsPriceAmountPresent()
+         {
+             return _driver.FindElements(PriceAmount).Count > 0;
+         }*/
         public bool IsPriceAmountPresent()
         {
-            return _driver.FindElements(PriceAmount).Count > 0;
+            bool isPresent = _driver.FindElements(PriceAmount).Count > 0;
+            Logger.Debug($"IsPriceAmountPresent returned: {isPresent}");
+            return isPresent;
         }
         // Fetch and validate the cart-summary API response
         public CartSummaryResponse GetCartSummary()
@@ -73,8 +76,8 @@ namespace www.menkind.co.uk.Pages
                 throw new InvalidOperationException("Failed to fetch cart summary.");
             }
 
-            Logger.Debug($"Cart summary response: {response.Content}");
-            return JsonConvert.DeserializeObject<CartSummaryResponse>(response.Content);
+            Logger.Debug($"Cart summary response: {response?.Content}");
+            return JsonConvert.DeserializeObject<CartSummaryResponse>(response?.Content);
         }
 
         // Model for the Cart Summary API response
@@ -125,8 +128,24 @@ namespace www.menkind.co.uk.Pages
                 Logger.Debug($"Added cookie: {cookie.Name} = {cookie.Value}");
             }
         }
+        #region OOS tests
+        public bool IsOOSMessage()
+        {
+            return WaitForElementToBeVisible(OOSMessage).Displayed;
+        }
+        public bool IsAddToCartDisabled()
+        {
+            var addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
+            return !addToCartButton.Enabled;
+        }
+        public string GetAddToCartText()
+        {
+            var addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
+            return addToCartButton.GetDomAttribute("value")?.Trim() ?? "";
+        }
+        #endregion
     }
-    
+
 }
     
 

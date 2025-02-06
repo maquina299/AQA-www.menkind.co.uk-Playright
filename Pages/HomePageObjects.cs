@@ -1,4 +1,6 @@
 ﻿
+using OpenQA.Selenium.Interactions;
+
 namespace www.menkind.co.uk.Pages
 {
     public class HomePageObject : BasePage
@@ -10,15 +12,8 @@ namespace www.menkind.co.uk.Pages
         private By LoginPassField => By.Id("login_pass");
         private By SignInButton => By.CssSelector("input[type='submit'][value='Sign In']");
         private By AccountLink => By.CssSelector("a.header__sign-in[href = '/account.php']");
-
-        /* private IWebElement? LogoSelector => _driver?.FindElement(By.CssSelector("a.header__logo"));
-         public IWebElement? SignInLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
-         private IWebElement? LoginEmailField => _driver?.FindElement(By.Id("login_email"));
-         private IWebElement? LoginPassField => _driver?.FindElement(By.Id("login_pass"));
-         public IWebElement? SignInButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Sign In']"));
-         public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in[href = '/account.php']"));
-        */
-
+        public void EnterLoginEmail(string loginEmail) => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
+        public void EnterLoginPass(string pass) => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
 
 
         public bool IsLogoDisplayed()
@@ -72,8 +67,6 @@ namespace www.menkind.co.uk.Pages
             return _driver?.Title ?? string.Empty;
         }
         //Login test part
-        public void EnterLoginEmail(string loginEmail) => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
-        public void EnterLoginPass(string pass) => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
         public bool IsUserLoggedIn()
         {
             try
@@ -85,12 +78,10 @@ namespace www.menkind.co.uk.Pages
                 return false;
             }
         }
-
         public void SignIn()
         {
-            WaitForElementToBeVisible(SignInLink).Click();
+            WaitForElementToBeClickable(SignInLink).Click();
         }
-
         public void Submit() => WaitForElementToBeVisible(SignInButton).Click();
 
 
