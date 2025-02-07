@@ -6,7 +6,7 @@ namespace www.menkind.co.uk.Pages
     public class HomePageObject : BasePage
     {
         // CHANGED: Use the overloaded BasePage constructor that accepts an existing driver.
-        public HomePageObject(IWebDriver driver) : base(driver) { }
+        public HomePageObject(IWebDriver driver) : base() { }
 
         private By LogoSelector => By.CssSelector("a.header__logo");
         private By SignInLink => By.CssSelector("a.header__sign-in");

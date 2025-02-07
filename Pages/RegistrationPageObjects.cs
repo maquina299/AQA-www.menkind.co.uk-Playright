@@ -4,7 +4,7 @@ namespace MenkindRegistrationTests.Pages
 {
     public class RegistrationPageObjects : BasePage
     {
-        public RegistrationPageObjects(IWebDriver driver) : base(driver) { }
+        public RegistrationPageObjects(IWebDriver driver) : base() { }
         private By SuccessMessage => By.CssSelector("h1.page-heading.classyunicodedone");
         private IWebElement? EmailField => Driver.FindElement(By.Id("FormField_1_input"));
         private IWebElement? PasswordField => Driver.FindElement(By.Id("FormField_2_input"));

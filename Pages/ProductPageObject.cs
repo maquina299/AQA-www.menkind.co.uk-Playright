@@ -7,7 +7,7 @@ namespace www.menkind.co.uk.Pages
 {
     public class ProductPageObject : BasePage
     {
-        public ProductPageObject(IWebDriver driver) : base(driver) { }
+        public ProductPageObject(IWebDriver driver) : base() { }
 
         // Selectors
         private By AddToBasketButton => By.Id("form-action-addToCart");

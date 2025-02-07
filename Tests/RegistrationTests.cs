@@ -16,7 +16,7 @@ namespace www.menkind.co.uk.Tests
         [SetUp]
         public void SetUp()
         {
-            _basePage = DriverFactory.SetupDriver(false, TestData.HomePageURL); // ✅ Centralized driver setup
+            _basePage = DriverFactory.SetupDriver(false, TestData.RegistrationPageURL); // ✅ Centralized driver setup
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            DriverFactory.DisposeAllDrivers(); // ✅ Centralized WebDriver cleanup
+            DriverFactory.DisposeCurrentDriver(); // ✅ Centralized WebDriver cleanup
         }
     }
 }

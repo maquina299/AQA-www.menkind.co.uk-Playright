@@ -50,7 +50,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            DriverFactory.DisposeAllDrivers(); // ✅ Centralized WebDriver cleanup
+            DriverFactory.DisposeCurrentDriver(); // ✅ Centralized WebDriver cleanup
         }
     }
 }

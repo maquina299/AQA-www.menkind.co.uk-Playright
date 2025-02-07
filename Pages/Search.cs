@@ -6,7 +6,7 @@ namespace www.menkind.co.uk.Pages
 {
     public class Search : BasePage
     {
-        public Search(IWebDriver driver) : base(driver) { }
+        public Search(IWebDriver driver) : base() { }
 
         // Locators
         private By SearchBox => By.Id("nav-quick-search");

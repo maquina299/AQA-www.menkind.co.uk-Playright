@@ -12,8 +12,14 @@ namespace www.menkind.co.uk.Base
 
         // ✅ Use thread-safe dictionary to track WebDrivers per test thread
         private static readonly ConcurrentDictionary<int, IWebDriver> _drivers = new();
-
+        static DriverFactory()
+        {
+            // Initialize NLog
+            var config = new XmlLoggingConfiguration("Config/NLog.config");
+            LogManager.Configuration = config;
+        }
         public static BasePage SetupDriver(bool enableImages = false, string? url = null)
+
         {
             Logger.Debug("Initializing WebDriver...");
 
@@ -42,6 +48,7 @@ namespace www.menkind.co.uk.Base
             driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(90);
 
             int threadId = Environment.CurrentManagedThreadId;
+            Logger.Debug($"WebDriver assigned for thread {threadId}.");
 
             // ✅ Ensure only one WebDriver is assigned per test thread
             if (!_drivers.ContainsKey(threadId))
