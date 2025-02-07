@@ -4,6 +4,7 @@ using www.menkind.co.uk.Base;
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     [AllureNUnit]
     [AllureSuite("Product Page")]
     [Obsolete]
@@ -34,7 +35,7 @@ namespace www.menkind.co.uk.Tests
 
             // Step 3: Verify the item in the cart-summary API
             var cartSummaryResponse = productPage.GetCartSummary();
-            Assert.That(cartSummaryResponse.ItemQuantities["33709"], Is.EqualTo(1), "Expected item not found in the cart.");
+            Assert.That(cartSummaryResponse.ItemQuantities[TestData.AddedToTheCardProductId], Is.EqualTo(1), "Expected item not found in the cart.");
 
             Logger.Debug("Test passed: Cart icon updated successfully.");
         }

@@ -3,7 +3,7 @@
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.All)] // Uncomment if you want to run tests in parallel
+    [Parallelizable(ParallelScope.All)]
     [AllureNUnit]
     [AllureSuite("Homepage")]
     [Obsolete]

@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium.Interactions;
+﻿using NUnit.Framework.Legacy;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Internal;
 using www.menkind.co.uk.Tests;
 
@@ -21,11 +22,11 @@ namespace www.menkind.co.uk.Pages
         // Methods
         public void EnterSearchQuery(string query)
         {
-            Actions actions = new Actions(Driver);
-            actions.SendKeys(Keys.Home).Perform();
+            //Actions actions = new Actions(Driver);
+            //actions.SendKeys(Keys.Home).Perform();
             var searchBox = WaitForElementToBeVisible(SearchBox);
             searchBox.Clear();
-            searchBox.SendKeys(TestData.query);
+            searchBox.SendKeys(query);
             Logger.Debug($"Entered search query: {query}");
         }
 
@@ -65,7 +66,10 @@ namespace www.menkind.co.uk.Pages
 
         public bool AreSearchResultsRelevant(string keyword)
         {
-            List<string> invalidResults = new();
+            // Errors list in case of the test failure
+            List<string> errors = new List<string>();
+            
+            List<string> invalidSearchResults = new();
 
             // Locators for search results in both sections
             var searchResultLinks = Driver.FindElements(By.CssSelector("ul li a.quick-search__results-link")); // Non-product results
@@ -76,32 +80,55 @@ namespace www.menkind.co.uk.Pages
 
             if (allResults.Count == 0)
             {
-                Logger.Warn("No search results found.");
-                return false;
+                errors.Add("No data in the search frame");
             }
+            if (productTitles.Count == 0)
+            {
+                Logger.Warn("No product found.");
+                try
+                {
+                    var noItemsElement = Driver.FindElement(By.CssSelector("ul.products li"));
 
+                    if (noItemsElement.Text == "No items found.")
+                    {
+                        Logger.Debug("The message 'No items found.' is displayed.");
+                    }
+
+                }
+                catch (NoSuchElementException)
+                {
+                errors.Add("The 'No items found.' element is not present.");
+                }
+            }
             // Validate each result
             foreach (var result in allResults)
             {
                 string title = result.Text.ToLower();
-                if (!title.Contains(TestData.query.ToLower()) && !title.Equals("new", StringComparison.OrdinalIgnoreCase))
+                Logger.Debug($"Result: {title}");
+                if (!title.Contains(keyword.ToLower()) && !title.Equals("new", StringComparison.OrdinalIgnoreCase))
                 {
-                    invalidResults.Add(title);
+                    invalidSearchResults.Add(title);
                 }
             }
 
-            if (invalidResults.Any())
+            if (invalidSearchResults.Any() && !invalidSearchResults.SequenceEqual(TestData.ValidResultTitles) && productTitles.Count == 0)
             {
-                Logger.Warn($"Some search results did not match: {string.Join(", ", invalidResults)}");
-                Logger.Debug($"Total invalid results: {invalidResults.Count}");
-                foreach (var item in invalidResults)
+                Logger.Warn($"Some search results did not match: {string.Join(", ", invalidSearchResults)}");
+                Logger.Debug($"Total invalid results: {invalidSearchResults.Count}");
+                foreach (var item in invalidSearchResults)
                 {
                 Logger.Debug($"Invalid result: {item}");
                 }
+                errors.Add("Invalid results were found");
+            }
+            if (errors.Any())
+            {
+                Assert.Fail("Test failed due to the following issues:\n" + string.Join("\n", errors));
                 return false;
             }
-
+            else
             return true;
+
         }
 
         public void ClickOutsideSearchFrame()

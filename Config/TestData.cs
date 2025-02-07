@@ -8,10 +8,16 @@
         public static readonly string HomePageURL = "https://www.menkind.co.uk";
         public static readonly string RegistrationPageURL = "https://www.menkind.co.uk/login.php?action=create_account";
         public static readonly string ProductPageURL = "https://www.menkind.co.uk/draft-wizard-ultrasonic-frothing-beer-dispenser";
+        public static readonly string AddedToTheCardProductId = "33709";
         public static readonly string SoldProductPageURL = "https://www.menkind.co.uk/man-points-scratch-off-game";
         public static readonly string GetCartSummary = "https://www.menkind.co.uk/api/storefront/cart-summary";
-        public static readonly string query = "beer";
-
+        public static readonly string SearchQuery = "beer";
+        public static readonly List<string> ValidResultTitles = new List<string>
+    {
+        "Top 100 Bestsellers".ToLower(),
+        "Gadgets & Tech Gifts".ToLower(),
+        "Gifts For Men".ToLower()
+    };
 
     }
 }

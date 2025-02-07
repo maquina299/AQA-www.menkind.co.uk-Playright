@@ -4,6 +4,7 @@ using www.menkind.co.uk.Base;
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     [AllureNUnit]
     [AllureSuite("Search Functionality")]
     [Obsolete]
@@ -24,10 +25,11 @@ namespace www.menkind.co.uk.Tests
         public void SearchFrame_ShouldDisplayResults_CloseAfterOutsideClick()
         {
             var searchPage = new Search(_basePage.Driver);
+            var searchQuery = TestData.SearchQuery;
             Logger.Debug("Starting test: SearchBox_ShouldDisplayResults_WhenSearchingForBeer");
 
             // Step 1: Enter search query "beer"
-            searchPage.EnterSearchQuery("beer");
+            searchPage.EnterSearchQuery(searchQuery);
 
             // Step 2: Verify search results frame appears
             Assert.That(searchPage.IsSearchFrameVisible(), "Search results frame did not appear.");
@@ -36,7 +38,7 @@ namespace www.menkind.co.uk.Tests
             Assert.That(searchPage.AreTabsPresent(), "Expected search tabs (products/non-products) are missing.");
 
             // Step 4: Verify search results contain the keyword "beer"
-            Assert.That(searchPage.AreSearchResultsRelevant("beer"), "Search results do not contain the expected keyword.");
+            Assert.That(searchPage.AreSearchResultsRelevant(searchQuery), "Search results do not contain the expected keyword.");
             Logger.Debug("Test passed: Search frame displayed relevant results successfully.");
 
             // Step 5: Close the search frame by clicking outside

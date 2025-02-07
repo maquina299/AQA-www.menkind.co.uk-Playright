@@ -5,6 +5,7 @@ namespace www.menkind.co.uk.Tests
 {
     [AllureNUnit]
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     [AllureSuite("Main suite")]
     [AllureSubSuite("Registration Page")]
     [Obsolete]
