@@ -18,6 +18,7 @@
         "Gadgets & Tech Gifts".ToLower(),
         "Gifts For Men".ToLower()
     };
+        public static readonly string SearchPageURL = "https://www.menkind.co.uk/search.php?search_query=beer";
 
     }
 }

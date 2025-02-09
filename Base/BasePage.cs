@@ -12,7 +12,10 @@ namespace www.menkind.co.uk.Base
         public IWebDriver Driver => DriverFactory.GetCurrentDriver();
 
         // ✅ WebDriverWait is now dynamically created to ensure it's always available
-        protected WebDriverWait Wait => new(Driver, TimeSpan.FromSeconds(10));
+        private Lazy<WebDriverWait> _wait = new(() =>
+            new WebDriverWait(DriverFactory.GetCurrentDriver(), TimeSpan.FromSeconds(5)));
+
+        protected WebDriverWait Wait => _wait.Value;
 
         public BasePage() { }
 
@@ -80,20 +83,21 @@ namespace www.menkind.co.uk.Base
             catch (Exception ex)
             {
                 Logger.Warn($"Error while handling discount modal: {ex.Message}");
-                try
-                {
-                    var alternativeClose = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'No Thanks')]"), TimeSpan.FromSeconds(5));
-                    alternativeClose?.Click();
-                    Logger.Info("Alternative discount modal closed.");
-                }
-                catch (WebDriverTimeoutException)
-                {
-                    Logger.Warn("Alternative discount modal not found.");
-                }
-                catch (Exception exi)
-                {
-                    Logger.Warn($"Error handling alternative discount modal: {exi.Message}");
-                }
+
+            }
+            try
+            {
+                var alternativeClose = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'No Thanks')]"), TimeSpan.FromSeconds(5));
+                alternativeClose?.Click();
+                Logger.Info("Alternative discount modal closed.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Alternative discount modal not found.");
+            }
+            catch (Exception exi)
+            {
+                Logger.Warn($"Error handling alternative discount modal: {exi.Message}");
             }
         }
 

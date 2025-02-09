@@ -79,25 +79,24 @@ namespace www.menkind.co.uk.Base
         {
             int threadId = Environment.CurrentManagedThreadId;
 
-            if (_drivers.TryRemove(threadId, out IWebDriver? driver))
+            if (_drivers.TryRemove(threadId, out IWebDriver? driver) && driver != null)
             {
                 try
                 {
                     Logger.Debug($"Disposing WebDriver for thread {threadId}.");
                     driver.Quit();
-                    driver.Dispose();
-                    Logger.Info($"WebDriver for thread {threadId} disposed.");
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warn($"Error disposing WebDriver for thread {threadId}: {ex.Message}");
+                    Logger.Warn($"Error disposing WebDriver: {ex.Message}");
+                }
+                finally
+                {
+                    driver.Dispose();
                 }
             }
-            else
-            {
-                Logger.Warn($"No WebDriver found for thread {threadId}. Nothing to dispose.");
-            }
         }
+
 
         public static IWebDriver GetCurrentDriver()
         {
