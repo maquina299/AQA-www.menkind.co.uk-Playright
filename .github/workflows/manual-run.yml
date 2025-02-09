@@ -52,7 +52,7 @@ jobs:
         elif [ "${{ github.event.inputs.test_suite }}" = "product page" ]; then
           dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Product"
         elif [ "${{ github.event.inputs.test_suite }}" = "search page" ]; then
-          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~search"
+          dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "FullyQualifiedName~Search"
         elif [ "${{ github.event.inputs.test_suite }}" = "smoke" ]; then
           dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Smoke"
         elif [ "${{ github.event.inputs.test_suite }}" = "regression" ]; then
