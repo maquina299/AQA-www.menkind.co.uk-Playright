@@ -22,11 +22,12 @@ namespace www.menkind.co.uk.Pages
         private By ProductPrices = By.CssSelector("ul.products li.product .product-price span");
         private By PriceFilter = By.CssSelector("button[aria-controls='facet-price']");
         private By PaginationNextLink = By.CssSelector("li.pagination-item--next a.pagination-link");
-        private By PaginationNextItem = By.CssSelector("li.pagination-item--current + li a.pagination-link");
+        private By PaginationNextItem = By.CssSelector("li.pagination-item--current + li:not(.pagination-item--next) a.pagination-link");
+        private By PaginationElementsAfterCurrentNotNextButton = By.CssSelector("li.pagination-item--current ~ li.pagination-item:not(.pagination-item--next)");
 
 
         #endregion
-#region Search frame tests
+        #region Search frame tests
         public void EnterSearchQuery(string query)
         {
             //Actions actions = new Actions(Driver);
@@ -201,7 +202,7 @@ namespace www.menkind.co.uk.Pages
 
         public void ApplyFilter()
         {
-            Thread.Sleep(2000);
+           // Thread.Sleep(2000);
             WaitForElementToBeClickable(ViewButton).Click();
             Logger.Info("Filter applied.");
         }
@@ -211,7 +212,7 @@ namespace www.menkind.co.uk.Pages
         {
             int totalProductCount = 0;
             int currentPage = 1;
-            bool isNextPageAvailable;
+            bool isNextPageAvailable=false;
 
             do
             {
@@ -222,38 +223,34 @@ namespace www.menkind.co.uk.Pages
                 Logger.Info($"Page {currentPage}: Found {products.Count} products. Total so far: {totalProductCount}.");
 
                 // Check if the "Next" button exists and is the immediate next to the first page
-                isNextPageAvailable = IsNextPageAvailable();
 
-                if (isNextPageAvailable)
+                if (Driver.FindElements(PaginationElementsAfterCurrentNotNextButton).Any())
                 {
                     // Click the "Next" button to go to the next page
                     GoToNextPage();
+                    WaitForProductsToLoad();
                     currentPage++;
+                    isNextPageAvailable = true;
                 }
+                else isNextPageAvailable = false;
+     
 
             } while (isNextPageAvailable);
 
             Logger.Info($"Total products found after filtering across all pages: {totalProductCount}.");
             return totalProductCount;
         }
-        private bool IsNextPageAvailable()
+        private void WaitForProductsToLoad()
         {
-            try
-            {
-                var nextButton = Driver.FindElement(PaginationNextLink);
-                var firstPage = Driver.FindElement(PaginationNextItem);
-
-                // Check if "Next" is the immediate next link after the current page
-                return nextButton.Displayed && firstPage.Displayed;
-            }
-            catch (NoSuchElementException)
-            {
-                return false; // If "Next" or pagination structure doesn't exist, we're on the last page
-            }
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            wait.Until(driver => driver.FindElements(ProductItems).Any()); // Wait until products are visible
+            Logger.Info("Page fully loaded with products.");
         }
+
+
         private void GoToNextPage()
         {
-            var nextButton = WaitForElementToBeClickable(PaginationNextLink);
+            var nextButton = WaitForElementToBeClickable(PaginationNextItem);
             nextButton.Click();
 
             Logger.Info("Navigated to the next page.");

@@ -17,7 +17,7 @@ namespace www.menkind.co.uk.Tests
         public void SetUp()
         {
             bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
-            _basePage = DriverFactory.SetupDriver(enableImages); // ✅ Fully handled in DriverFactory
+            _basePage = DriverFactory.SetupDriver(enableImages);
         }
 
         [Test]
