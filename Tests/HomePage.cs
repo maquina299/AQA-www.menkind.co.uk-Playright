@@ -1,33 +1,26 @@
 ﻿using www.menkind.co.uk.Pages;
 
-
 namespace www.menkind.co.uk.Tests
 {
     [TestFixture]
-    // This will run all tests in this fixture in parallel
-    //[Parallelizable(ParallelScope.All)] 
-
+    [Parallelizable(ParallelScope.All)]
     [AllureNUnit]
     [AllureSuite("Homepage")]
     [Obsolete]
     public class HomePageTests
     {
-        private BasePage? _basePage;
+        // CHANGED: Removed the IWebDriver field since BasePage creates its own driver.
+        private BasePage _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
+        private HomePageObject homePage;
 
         [SetUp]
-
-        //setup with enabling the images for the homepageloads test
         public void SetUp()
         {
             bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
-            Logger.Debug("Enable image="+enableImages);
-            _basePage = new BasePage(enableImages); 
-            _basePage.NavigateToUrl(TestData.HomePageURL);
-            _basePage.HandleModals();
+            _basePage = DriverFactory.SetupDriver(enableImages);
+            homePage = new HomePageObject(_basePage.Driver);
         }
-
 
         [Test]
         [Category("Smoke")]
@@ -37,8 +30,8 @@ namespace www.menkind.co.uk.Tests
         [AllureSeverity(SeverityLevel.critical)]
         [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
-        { 
-            var homePage = new HomePageObject();
+        {
+            // CHANGED: Use _basePage.Driver to pass the driver to the page object.
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
             {
@@ -55,26 +48,20 @@ namespace www.menkind.co.uk.Tests
         [Category("Regression")]
         [AllureTag("Regression")]
         [AllureSubSuite("Regression")]
-
         [AllureOwner("Vlad")]
         [AllureSeverity(SeverityLevel.normal)]
         [AllureTms("TMS-xx")]
         public void LoginSuccessful()
         {
             Logger.Debug(TestData.ValidEmail);
-            var homePage = new HomePageObject();
-
             Logger.Debug("Executing LoginSuccessful test");
             homePage.SignIn();
-           // ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", homePage.SignInLink);
-
             Logger.Debug("Filling in the Testdata");
-            
+
             homePage.EnterLoginEmail(TestData.ValidEmail);
             homePage.EnterLoginPass(TestData.ValidPassword);
 
             Logger.Debug("Clicking submit button");
-               
             homePage.Submit();
             Logger.Debug("Login button clicked");
 
@@ -86,7 +73,13 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            BasePage.QuitDriver(); // Quit driver after all tests
+            if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+            {
+                homePage.TakeScreenshot();
+                // Capture the screenshot if the test failed
+                // _basePage.TakeScreenshot("TestFailed_Screenshot");
+            }
+            DriverFactory.DisposeCurrentDriver();
         }
     }
 }

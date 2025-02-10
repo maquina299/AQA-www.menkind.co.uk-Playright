@@ -1,61 +1,82 @@
-﻿using www.menkind.co.uk.Base;
-
-namespace MenkindRegistrationTests.Pages
+﻿namespace MenkindRegistrationTests.Pages
 {
     public class RegistrationPageObjects : BasePage
     {
-        public RegistrationPageObjects()
-        {
-            _driver = BasePage.GetDriver(); // Use the existing WebDriver instance
-        }
+        public RegistrationPageObjects(IWebDriver driver) : base() { }
 
-        // Локаторы
+        // 🔹 Store locators as `By` instead of direct element access
+        private By SuccessMessage = By.CssSelector("h1.page-heading.classyunicodedone");
+        private By EmailField = By.Id("FormField_1_input");
+        private By PasswordField = By.Id("FormField_2_input");
+        private By ConfirmPasswordField = By.Id("FormField_3_input");
+        private By FirstNameField = By.Id("FormField_4_input");
+        private By LastNameField = By.Id("FormField_5_input");
+        private By PhoneNumField = By.Id("FormField_7_input");
+        private By PostCodeField = By.Id("FormField_13_input");
+        private By AddressField = By.Id("FormField_8_input");
+        private By CityField = By.Id("FormField_10_input");
+        private By CountryField = By.Id("FormField_11_select");
+        private By CountyField = By.Id("FormField_12_input");
+        private By SubmitButton = By.CssSelector("input[type='submit'][value='Create Account']");
+        private By AccountLink = By.CssSelector("a.header__sign-in");
 
-        private IWebElement? EmailField => _driver?.FindElement(By.Id("FormField_1_input"));
-        private IWebElement? PasswordField => _driver?.FindElement(By.Id("FormField_2_input"));
-        private IWebElement? ConfirmPasswordField => _driver?.FindElement(By.Id("FormField_3_input"));
-        private IWebElement? FirstNameField => _driver?.FindElement(By.Id("FormField_4_input"));
-        private IWebElement? LastNameField => _driver?.FindElement(By.Id("FormField_5_input"));
-        private IWebElement? PhoneNumField => _driver?.FindElement(By.Id("FormField_7_input"));
-        private IWebElement? PostCodeField => _driver?.FindElement(By.Id("FormField_13_input"));
-        private IWebElement? AddressField => _driver?.FindElement(By.Id("FormField_8_input"));
-        private IWebElement? CityField => _driver?.FindElement(By.Id("FormField_10_input"));
-        private IWebElement? CountryField => _driver?.FindElement(By.Id("FormField_11_select"));
-        private IWebElement? CountyField => _driver?.FindElement(By.Id("FormField_12_input"));
-
-        private IWebElement? SubmitButton => _driver?.FindElement(By.CssSelector("input[type='submit'][value='Create Account']"));
-
-        public IWebElement? AccountLink => _driver?.FindElement(By.CssSelector("a.header__sign-in"));
-
+        // ✅ Use explicit waits for stability and reliability
         public bool IsUserLoggedIn()
         {
-            return AccountLink?.Displayed ?? false;
+            return WaitForElementToBeVisible(AccountLink, TimeSpan.FromSeconds(5)).Displayed;
         }
 
-        // Interaction methods
-        public void EnterFirstName(string firstName) => FirstNameField?.SendKeys(firstName);
-        public void EnterLastName(string lastName) => LastNameField?.SendKeys(lastName);
-        public void EnterEmail(string email) => EmailField?.SendKeys(email);
+        public void EnterFirstName(string firstName)
+            => WaitForElementToBeVisible(FirstNameField).SendKeys(firstName);
+
+        public void EnterLastName(string lastName)
+            => WaitForElementToBeVisible(LastNameField).SendKeys(lastName);
+
+        public void EnterEmail(string email)
+            => WaitForElementToBeVisible(EmailField).SendKeys(email);
+
         public void EnterPassword(string password)
         {
-            PasswordField?.SendKeys(password);
-            ConfirmPasswordField?.SendKeys(password);
+            WaitForElementToBeVisible(PasswordField).SendKeys(password);
+            WaitForElementToBeVisible(ConfirmPasswordField).SendKeys(password);
         }
-        public void EnterPhoneNumber(string phoneNumber) => PhoneNumField?.SendKeys(phoneNumber);
-        public void EnterPostCode(string postCode) => PostCodeField?.SendKeys(postCode);
-        public void EnterAddress(string address) => AddressField?.SendKeys(address);
-        public void EnterCity(string city) => CityField?.SendKeys(city);
+
+        public void EnterPhoneNumber(string phoneNumber)
+            => WaitForElementToBeVisible(PhoneNumField).SendKeys(phoneNumber);
+
+        public void EnterPostCode(string postCode)
+            => WaitForElementToBeVisible(PostCodeField).SendKeys(postCode);
+
+        public void EnterAddress(string address)
+            => WaitForElementToBeVisible(AddressField).SendKeys(address);
+
+        public void EnterCity(string city)
+            => WaitForElementToBeVisible(CityField).SendKeys(city);
+
         public void SelectCountry(string country)
         {
-            if (CountryField != null)
-            {
-                var selectElement = new SelectElement(CountryField);
-                selectElement.SelectByText(country);
-            }
+            IWebElement countryDropdown = WaitForElementToBeVisible(CountryField);
+            var selectElement = new SelectElement(countryDropdown);
+            selectElement.SelectByText(country);
         }
-        public void EnterCounty(string county) => CountyField?.SendKeys(county);
 
-        public void Submit() => SubmitButton?.Click();
-        public string GenerateUniqueEmail() => $"testuser_{Guid.NewGuid()}@example.com";
+        public void EnterCounty(string county)
+            => WaitForElementToBeVisible(CountyField).SendKeys(county);
+
+        public void Submit()
+            => WaitForElementToBeVisible(SubmitButton).Click();
+
+        public string GenerateUniqueEmail()
+            => $"testuser_{Guid.NewGuid()}@example.com";
+
+        public bool IsSuccessMessageVisible()
+        {
+            return WaitForElementToBeVisible(SuccessMessage, TimeSpan.FromSeconds(5)).Displayed;
+        }
+
+        public string GetSuccessMessageText()
+        {
+            return WaitForElementToBeVisible(SuccessMessage, TimeSpan.FromSeconds(5)).Text;
+        }
     }
 }

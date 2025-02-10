@@ -7,7 +7,7 @@ namespace www.menkind.co.uk.Pages
 {
     public class ProductPageObject : BasePage
     {
-        public ProductPageObject() { }
+        public ProductPageObject(IWebDriver driver) : base() { }
 
         // Selectors
         private By AddToBasketButton => By.Id("form-action-addToCart");
@@ -21,8 +21,8 @@ namespace www.menkind.co.uk.Pages
         public void AddToBasket()
         {
             IWebElement addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
-            _driver.ExecuteJavaScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
-            //((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
+            Driver.ExecuteJavaScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
+            //((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
 
             WaitForElementToBeClickable(AddToBasketButton).Click();
             WaitForElementToBeClickable(SubmitAdding).Click();
@@ -48,11 +48,11 @@ namespace www.menkind.co.uk.Pages
 
         /* public bool IsPriceAmountPresent()
          {
-             return _driver.FindElements(PriceAmount).Count > 0;
+             return Driver.FindElements(PriceAmount).Count > 0;
          }*/
         public bool IsPriceAmountPresent()
         {
-            bool isPresent = _driver.FindElements(PriceAmount).Count > 0;
+            bool isPresent = Driver.FindElements(PriceAmount).Count > 0;
             Logger.Debug($"IsPriceAmountPresent returned: {isPresent}");
             return isPresent;
         }
@@ -98,13 +98,13 @@ namespace www.menkind.co.uk.Pages
             public class CartSummaryResponse
             {
                 [JsonProperty("data")]
-                public CartData Data { get; set; }
+                public CartData? Data { get; set; }
             }
 
             public class CartData
             {
                 [JsonProperty("line_items")]
-                public List<LineItem> LineItems { get; set; }
+                public List<LineItem>? LineItems { get; set; }
             }
 
             public class LineItem
@@ -113,13 +113,13 @@ namespace www.menkind.co.uk.Pages
                 public int ProductId { get; set; }
                 
                 [JsonProperty("product_name")]
-                public string ProductName { get; set; }
+                public string? ProductName { get; set; }
             }
         }
         private void AddCookiesToRequest(RestRequest request)
         {
             // Get all cookies from the current WebDriver session
-            ICollection<Cookie> cookies = _driver.Manage().Cookies.AllCookies;
+            ICollection<Cookie> cookies = Driver.Manage().Cookies.AllCookies;
 
             foreach (var cookie in cookies)
             {
