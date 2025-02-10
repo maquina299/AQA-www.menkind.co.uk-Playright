@@ -75,12 +75,17 @@ namespace www.menkind.co.uk.Base
             return basePage;
         }
 
-        public static void DisposeCurrentDriver()
+        public static void DisposeCurrentDriver(BasePage basePage)
         {
 
             int threadId = Environment.CurrentManagedThreadId;
             if (_drivers.TryRemove(threadId, out IWebDriver? driver) && driver != null)
             {
+                if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+                {
+                    basePage.TakeScreenshot();
+                    // Capture the screenshot if the test failed
+                }
                 try
                 {
                     Logger.Debug($"Disposing WebDriver for thread {threadId}.");
@@ -97,9 +102,9 @@ namespace www.menkind.co.uk.Base
             }
         }
 
-
         public static IWebDriver GetCurrentDriver()
         {
+
             int threadId = Environment.CurrentManagedThreadId;
             if (_drivers.TryGetValue(threadId, out IWebDriver? driver) && driver != null)
             {
