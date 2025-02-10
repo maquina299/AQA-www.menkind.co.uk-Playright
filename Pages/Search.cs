@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using OpenQA.Selenium.DevTools.V129.Debugger;
+using System.Text.RegularExpressions;
 using www.menkind.co.uk.Tests;
 
 namespace www.menkind.co.uk.Pages
@@ -16,7 +17,8 @@ namespace www.menkind.co.uk.Pages
         private By PageBackground => By.CssSelector("div.quick-search__underlay.is-open");
         private By PageBackgroundAlt => (By.TagName("body"));
         private By ViewAllFiltersButton = By.XPath("//button[contains(text(), 'View all filters')]");
-        private By FirstFilterLabel = By.CssSelector("li.facet-list__item:nth-child(3) a.facet-list__action");
+        private By FirstFilterLabel = By.CssSelector("li.facet-list__item a.facet-list__action");
+        //private By FirstFilterLabel = By.CssSelector("li.facet-list__item:nth-child(3) a.facet-list__action");
         private By ViewButton = By.XPath("//button[contains(text(), 'View (')]");
         private By ProductItems = By.CssSelector("li.product article.product-card");
         private By ProductPrices = By.CssSelector("ul.products li.product .product-price span");
@@ -27,7 +29,8 @@ namespace www.menkind.co.uk.Pages
 
 
         #endregion
-        #region Search frame tests
+
+#region Search frame tests
         public void EnterSearchQuery(string query)
         {
             //Actions actions = new Actions(Driver);
@@ -154,13 +157,21 @@ namespace www.menkind.co.uk.Pages
             }
         }
         #endregion
+
 #region Search filters tests
         public void OpenFiltersPanel()
         {
-            WaitForElementToBeClickable(ViewAllFiltersButton).Click();
-            Logger.Info("Opened filter panel.");
+            try
+            {
+                WaitForElementToBeClickable(ViewAllFiltersButton).Click();
+                Logger.Info("Opened filter panel.");
+            }
+            catch (Exception ex) 
+            {
+                Logger.Debug(ex, "No filters displayed");
+                throw;
+            }
         }
-
         // ✅ Step 3: Capture first filter details (returns item count & max price)
         public (int itemCount, decimal? maxPrice) GetFirstFilterDetails()
         {
@@ -212,7 +223,7 @@ namespace www.menkind.co.uk.Pages
         {
             int totalProductCount = 0;
             int currentPage = 1;
-            bool isNextPageAvailable=false;
+            bool isNextPageAvailable;
 
             do
             {
@@ -233,8 +244,6 @@ namespace www.menkind.co.uk.Pages
                     isNextPageAvailable = true;
                 }
                 else isNextPageAvailable = false;
-     
-
             } while (isNextPageAvailable);
 
             Logger.Info($"Total products found after filtering across all pages: {totalProductCount}.");
@@ -242,17 +251,22 @@ namespace www.menkind.co.uk.Pages
         }
         private void WaitForProductsToLoad()
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
             wait.Until(driver => driver.FindElements(ProductItems).Any()); // Wait until products are visible
             Logger.Info("Page fully loaded with products.");
         }
 
-
+        int GoToNextPageRepeats = 0;
         private void GoToNextPage()
         {
+            ScrollToElementWithActions(PaginationNextItem);
+            GoToNextPageRepeats++;
+            if (GoToNextPageRepeats >5) 
+            {
+                Thread.Sleep(2000);
+            }
             var nextButton = WaitForElementToBeClickable(PaginationNextItem);
             nextButton.Click();
-
             Logger.Info("Navigated to the next page.");
         }
 

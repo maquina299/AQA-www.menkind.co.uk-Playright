@@ -13,11 +13,14 @@ namespace www.menkind.co.uk.Tests
     {
         private BasePage _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private RegistrationPageObjects registrationPage;
 
         [SetUp]
         public void SetUp()
         {
             _basePage = DriverFactory.SetupDriver(false, TestData.RegistrationPageURL); // ✅ Centralized driver setup
+            registrationPage = new RegistrationPageObjects(_basePage.Driver);
+
         }
 
         [Test]
@@ -28,7 +31,6 @@ namespace www.menkind.co.uk.Tests
         [AllureTms("TMS-xx")]
         public void UserRegistration_ShouldSucceed()
         {
-            var registrationPage = new RegistrationPageObjects(_basePage.Driver);
             Logger.Info("Started to fill in required registration fields");
 
             // Step 1: Fill in all the registration fields

@@ -12,11 +12,13 @@ namespace www.menkind.co.uk.Tests
     {
         private BasePage _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private ProductPageObject productPage;
 
         [SetUp]
         public void SetUp()
         {
-            _basePage = DriverFactory.SetupDriver(false, TestData.ProductPageURL); // ✅ Centralized driver setup
+            _basePage = DriverFactory.SetupDriver(false, TestData.ProductPageURL);
+            productPage = new ProductPageObject(_basePage.Driver);
         }
 
         [Test]
@@ -24,7 +26,6 @@ namespace www.menkind.co.uk.Tests
         [AllureSubSuite("Add to Cart")]
         public void AddItemToCart_ShouldUpdateCartIcon()
         {
-            var productPage = new ProductPageObject(_basePage.Driver);
             Logger.Debug("Starting test: AddItemToCart_ShouldUpdateCartIcon");
 
             // Step 1: Add item to basket
@@ -49,9 +50,6 @@ namespace www.menkind.co.uk.Tests
 
             // ✅ No need for `new BasePage(false)`, just navigate to the sold-out product
             _basePage.NavigateToUrl(TestData.SoldProductPageURL);
-
-            var productPage = new ProductPageObject(_basePage.Driver);
-
             Assert.Multiple(() =>
             {
                 Assert.That(productPage.IsOOSMessage(), Is.True, "OOS is not displayed");

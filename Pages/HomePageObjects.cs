@@ -50,6 +50,7 @@ namespace www.menkind.co.uk.Pages
                 if (!isLoaded)
                 {
                     Logger.Warn("Logo image is not fully loaded");
+                    TakeScreenshot("logo_is_not_loaded");
                 }
 
                 return isLoaded;

@@ -12,12 +12,14 @@ namespace www.menkind.co.uk.Tests
         // CHANGED: Removed the IWebDriver field since BasePage creates its own driver.
         private BasePage _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private HomePageObject homePage;
 
         [SetUp]
         public void SetUp()
         {
             bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
             _basePage = DriverFactory.SetupDriver(enableImages);
+            homePage = new HomePageObject(_basePage.Driver);
         }
 
         [Test]
@@ -30,7 +32,6 @@ namespace www.menkind.co.uk.Tests
         public void HomePageLoadsSuccessfully()
         {
             // CHANGED: Use _basePage.Driver to pass the driver to the page object.
-            var homePage = new HomePageObject(_basePage.Driver);
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
             {
@@ -53,8 +54,6 @@ namespace www.menkind.co.uk.Tests
         public void LoginSuccessful()
         {
             Logger.Debug(TestData.ValidEmail);
-            var homePage = new HomePageObject(_basePage.Driver);
-
             Logger.Debug("Executing LoginSuccessful test");
             homePage.SignIn();
             Logger.Debug("Filling in the Testdata");
@@ -74,7 +73,13 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            DriverFactory.DisposeCurrentDriver(); // ✅ Each test disposes its own driver only
+            if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+            {
+                homePage.TakeScreenshot();
+                // Capture the screenshot if the test failed
+                // _basePage.TakeScreenshot("TestFailed_Screenshot");
+            }
+            DriverFactory.DisposeCurrentDriver();
         }
     }
 }

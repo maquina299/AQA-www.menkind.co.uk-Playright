@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using NLog;
+using OpenQA.Selenium.Interactions;
 
 namespace www.menkind.co.uk.Base
 {
@@ -100,7 +101,64 @@ namespace www.menkind.co.uk.Base
                 Logger.Warn($"Error handling alternative discount modal: {exi.Message}");
             }
         }
+        public void ScrollToElementWithActions(By elementLocator)
+        {
+            // Locate the element using the passed 'By' locator
+            var element = Driver.FindElement(elementLocator);
+
+            // Create an Actions object
+            Actions actions = new Actions(Driver);
+
+            // Move to the element (this will scroll to it)
+            actions.MoveToElement(element).Perform();
+            WaitForElementToBeVisible(elementLocator);
+        }
+        public void EnsureScreenshotsDirectoryExists()
+        {
+            string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
+
+            // Check if the directory exists
+            if (!Directory.Exists(screenshotsFolder))
+            {
+                // Create the directory if it doesn't exist
+                Directory.CreateDirectory(screenshotsFolder);
+                Logger.Info($"Created Screenshots directory at: {screenshotsFolder}");
+            }
+            else
+            {
+                Logger.Info($"Screenshots directory already exists at: {screenshotsFolder}");
+            }
+        }
+        public void TakeScreenshot(string fileName = null)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                }
+
+                EnsureScreenshotsDirectoryExists();
+
+                // Create a screenshot object using the WebDriver instance
+                ITakesScreenshot screenshotDriver = (ITakesScreenshot)Driver;
+
+                // Capture screenshot
+                Screenshot screenshot = screenshotDriver.GetScreenshot();
+
+                // Save the screenshot to a specific file path
+                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots", fileName);
+
+                screenshot.SaveAsFile(filePath);
+
+                Logger.Info($"Screenshot saved to: {filePath}");
+            }
+            catch (Exception screenshotEx)
+            {
+                Logger.Error(screenshotEx, "Failed to capture screenshot");
+            }
 
 
+        }
     }
 }

@@ -12,11 +12,13 @@ namespace www.menkind.co.uk.Tests
     {
         private BasePage _basePage;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
+        private Search searchPage;
         [SetUp]
         public void SetUp()
         {
         _basePage = DriverFactory.SetupDriver(false, TestData.SearchPageURL);
+        searchPage = new Search(_basePage.Driver);
+
         }
 
         [Test]
@@ -24,7 +26,6 @@ namespace www.menkind.co.uk.Tests
         [AllureSubSuite("Regression")]
         public void SearchFrame_ShouldDisplayResults_CloseAfterOutsideClick()
         {
-            var searchPage = new Search(_basePage.Driver);
             var searchQuery = TestData.SearchQuery;
             Logger.Debug("Starting test: SearchBox_ShouldDisplayResults_WhenSearchingForBeer");
 
@@ -58,8 +59,6 @@ namespace www.menkind.co.uk.Tests
             {
                 throw new InvalidOperationException("BasePage is not initialized.");
             }
-            var searchPage = new Search(_basePage.Driver);
-
             // Step 2: Open the filters panel
             searchPage.OpenFiltersPanel();
 

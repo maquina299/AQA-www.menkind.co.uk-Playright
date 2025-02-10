@@ -77,8 +77,8 @@ namespace www.menkind.co.uk.Base
 
         public static void DisposeCurrentDriver()
         {
-            int threadId = Environment.CurrentManagedThreadId;
 
+            int threadId = Environment.CurrentManagedThreadId;
             if (_drivers.TryRemove(threadId, out IWebDriver? driver) && driver != null)
             {
                 try
