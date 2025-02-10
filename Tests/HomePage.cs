@@ -73,13 +73,12 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+          /*  if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
             {
                 homePage.TakeScreenshot();
                 // Capture the screenshot if the test failed
-                // _basePage.TakeScreenshot("TestFailed_Screenshot");
-            }
-            DriverFactory.DisposeCurrentDriver();
+            }*/
+            DriverFactory.DisposeCurrentDriver(homePage);
         }
     }
 }
