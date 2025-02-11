@@ -23,7 +23,7 @@ namespace www.menkind.co.uk.Base
         {
             Logger.Debug("Initializing WebDriver...");
 
-            ChromeOptions options = new ChromeOptions();
+            ChromeOptions options = new();
 
             if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
             {

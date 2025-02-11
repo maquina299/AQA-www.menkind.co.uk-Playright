@@ -9,23 +9,23 @@ namespace www.menkind.co.uk.Pages
         public Search(IWebDriver driver) : base() { }
 
 #region Locators
-        private By SearchBox => By.Id("nav-quick-search");
-        private By SearchResultsFrame => By.CssSelector("section.quickSearchResults.is-open");
-        private By ProductsTab => By.CssSelector("div.quick-search__products"); // Ensure this exists
-        private By NonProductsTab => By.CssSelector("div.quick-search__non-products"); // Ensure this exists
-        private By SearchResultTitles => By.CssSelector("div.quickSearchResults a");
-        private By PageBackground => By.CssSelector("div.quick-search__underlay.is-open");
-        private By PageBackgroundAlt => (By.TagName("body"));
-        private By ViewAllFiltersButton = By.XPath("//button[contains(text(), 'View all filters')]");
-        private By FirstFilterLabel = By.CssSelector("li.facet-list__item a.facet-list__action");
+        private static By SearchBox => By.Id("nav-quick-search");
+        private static By SearchResultsFrame => By.CssSelector("section.quickSearchResults.is-open");
+        private static By ProductsTab => By.CssSelector("div.quick-search__products"); // Ensure this exists
+        private static By NonProductsTab => By.CssSelector("div.quick-search__non-products"); // Ensure this exists
+        private static By SearchResultTitles => By.CssSelector("div.quickSearchResults a");
+        private static By PageBackground => By.CssSelector("div.quick-search__underlay.is-open");
+        private static By PageBackgroundAlt => (By.TagName("body"));
+        private static readonly By ViewAllFiltersButton = By.XPath("//button[contains(text(), 'View all filters')]");
+        private static readonly By FirstFilterLabel = By.CssSelector("li.facet-list__item a.facet-list__action");
         //private By FirstFilterLabel = By.CssSelector("li.facet-list__item:nth-child(3) a.facet-list__action");
-        private By ViewButton = By.XPath("//button[contains(text(), 'View (')]");
-        private By ProductItems = By.CssSelector("li.product article.product-card");
-        private By ProductPrices = By.CssSelector("ul.products li.product .product-price span");
-        private By PriceFilter = By.CssSelector("button[aria-controls='facet-price']");
-        private By PaginationNextLink = By.CssSelector("li.pagination-item--next a.pagination-link");
-        private By PaginationNextItem = By.CssSelector("li.pagination-item--current + li:not(.pagination-item--next) a.pagination-link");
-        private By PaginationElementsAfterCurrentNotNextButton = By.CssSelector("li.pagination-item--current ~ li.pagination-item:not(.pagination-item--next)");
+        private static readonly By ViewButton = By.XPath("//button[contains(text(), 'View (')]");
+        private static readonly By ProductItems = By.CssSelector("li.product article.product-card");
+        private static readonly By ProductPrices = By.CssSelector("ul.products li.product .product-price span");
+        private static readonly By PriceFilter = By.CssSelector("button[aria-controls='facet-price']");
+        private static readonly By PaginationNextLink = By.CssSelector("li.pagination-item--next a.pagination-link");
+        private static readonly By PaginationNextItem = By.CssSelector("li.pagination-item--current + li:not(.pagination-item--next) a.pagination-link");
+        private static readonly By PaginationElementsAfterCurrentNotNextButton = By.CssSelector("li.pagination-item--current ~ li.pagination-item:not(.pagination-item--next)");
 
 
         #endregion
@@ -78,7 +78,7 @@ namespace www.menkind.co.uk.Pages
         public bool AreSearchResultsRelevant(string keyword)
         {
             // Errors list in case of the test failure
-            List<string> errors = new List<string>();
+            List<string> errors = new();
             
             List<string> invalidSearchResults = new();
 
@@ -219,19 +219,27 @@ namespace www.menkind.co.uk.Pages
         }
 
         // ✅ Step 5: Get number of displayed items
-        public int GetDisplayedProductCount()
+        public (int, bool) GetDisplayedProductCount(decimal? maxPrice)
         {
             int totalProductCount = 0;
             int currentPage = 1;
             bool isNextPageAvailable;
+            bool allPricesValid = true;  
+            bool allPagePricesValid;
 
             do
             {
                 // Find all product items on the current page and add them to the total count
                 var products = Driver.FindElements(ProductItems);
                 totalProductCount += products.Count;
-
                 Logger.Info($"Page {currentPage}: Found {products.Count} products. Total so far: {totalProductCount}.");
+
+                allPagePricesValid = ValidateProductPrices(maxPrice);
+                if (!allPagePricesValid)
+                {
+                    allPricesValid = false;
+                    Logger.Debug($"Some of the prices are invalid on the page {currentPage}");
+                }
 
                 // Check if the "Next" button exists and is the immediate next to the first page
 
@@ -247,7 +255,7 @@ namespace www.menkind.co.uk.Pages
             } while (isNextPageAvailable);
 
             Logger.Info($"Total products found after filtering across all pages: {totalProductCount}.");
-            return totalProductCount;
+            return (totalProductCount, allPricesValid);
         }
         private void WaitForProductsToLoad()
         {
@@ -256,12 +264,12 @@ namespace www.menkind.co.uk.Pages
             Logger.Info("Page fully loaded with products.");
         }
 
-        int GoToNextPageRepeats = 0;
+        int GoToNextPageRepeats = 1;
         private void GoToNextPage()
         {
             ScrollToElementWithActions(PaginationNextItem);
             GoToNextPageRepeats++;
-            if (GoToNextPageRepeats >5) 
+            if (GoToNextPageRepeats >15) 
             {
                 Thread.Sleep(2000);
             }
@@ -302,7 +310,7 @@ namespace www.menkind.co.uk.Pages
 
 
         // 🔹 Extracts price from text (e.g., "£10 and under" → 10.00)
-        private decimal? ExtractPrice(string text)
+        private static decimal? ExtractPrice(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
