@@ -68,7 +68,7 @@ namespace www.menkind.co.uk.Tests
             searchPage.WaitForViewButtonUpdate();
             searchPage.ApplyFilter();
 
-            int actualItemCount = searchPage.GetDisplayedProductCount();
+            var (actualItemCount, allPricesValid) = searchPage.GetDisplayedProductCount(maxPrice);
 
             Assert.Multiple(() =>
             { 
@@ -77,7 +77,6 @@ namespace www.menkind.co.uk.Tests
                 $"Expected {expectedItemCount} items but found {actualItemCount}.");
 
             // Step 6: Validate all product prices
-            bool allPricesValid = searchPage.ValidateProductPrices(maxPrice);
             Assert.That(allPricesValid, Is.True, "Some items exceed the selected price range.");
 
             Logger.Info("Test passed: Filter applied correctly.");

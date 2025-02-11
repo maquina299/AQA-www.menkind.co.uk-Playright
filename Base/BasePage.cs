@@ -13,7 +13,7 @@ namespace www.menkind.co.uk.Base
         public IWebDriver Driver => DriverFactory.GetCurrentDriver();
 
         // ✅ WebDriverWait is now dynamically created to ensure it's always available
-        private Lazy<WebDriverWait> _wait = new(() =>
+        private readonly Lazy<WebDriverWait> _wait = new(() =>
             new WebDriverWait(DriverFactory.GetCurrentDriver(), TimeSpan.FromSeconds(5)));
 
         protected WebDriverWait Wait => _wait.Value;
@@ -55,8 +55,17 @@ namespace www.menkind.co.uk.Base
                 Logger.Warn("WebDriver is not initialized.");
                 return;
             }
-
             try
+            {
+                var alternativeClose = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'No Thanks')]"), TimeSpan.FromSeconds(5));
+                alternativeClose?.Click();
+                Logger.Info("Alternative discount modal closed.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Alternative discount modal not found.");
+            }
+                try
             {
                 var cookieButton = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]"), TimeSpan.FromSeconds(5));
                 cookieButton?.Click();
@@ -107,13 +116,13 @@ namespace www.menkind.co.uk.Base
             var element = Driver.FindElement(elementLocator);
 
             // Create an Actions object
-            Actions actions = new Actions(Driver);
+            Actions actions = new(Driver);
 
             // Move to the element (this will scroll to it)
             actions.MoveToElement(element).Perform();
             WaitForElementToBeVisible(elementLocator);
         }
-        public void EnsureScreenshotsDirectoryExists()
+        public static void EnsureScreenshotsDirectoryExists()
         {
             string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
 

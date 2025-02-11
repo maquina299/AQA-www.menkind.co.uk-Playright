@@ -13,13 +13,13 @@
         public static readonly string AddedToTheCardProductId = "33709";
         public static readonly string SoldProductPageURL = "https://www.menkind.co.uk/man-points-scratch-off-game";
         public static readonly string GetCartSummary = "https://www.menkind.co.uk/api/storefront/cart-summary";
-        public static readonly string SearchQuery = "beer";
-        public static readonly List<string> ValidResultTitles = new List<string>
-    {
+        public static readonly string SearchQuery = "massage";//gift (581 in filter), massage (88), beer
+        public static readonly List<string> ValidResultTitles =
+    [
         "Top 100 Bestsellers".ToLower(),
         "Gadgets & Tech Gifts".ToLower(),
         "Gifts For Men".ToLower()
-    };
+    ];
         public static readonly string SearchPageURL = $"https://www.menkind.co.uk/search.php?search_query={SearchQuery}";
 
     }
