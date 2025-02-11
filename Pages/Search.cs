@@ -230,11 +230,15 @@ namespace www.menkind.co.uk.Pages
             do
             {
                 // Find all product items on the current page and add them to the total count
+                WaitForProductsToLoad();
                 var products = Driver.FindElements(ProductItems);
                 totalProductCount += products.Count;
-                Logger.Info($"Page {currentPage}: Found {products.Count} products. Total so far: {totalProductCount}.");
+                Logger.Info($"Page {currentPage}: Found {products.Count} products. Total so far: {totalProductCount}. Page URL: {Driver.Url}");
+                //WaitForProductsToLoad();
 
                 allPagePricesValid = ValidateProductPrices(maxPrice);
+                if (currentPage==2)
+                    Thread.Sleep(1000);
                 if (!allPagePricesValid)
                 {
                     allPricesValid = false;
@@ -245,10 +249,10 @@ namespace www.menkind.co.uk.Pages
 
                 if (Driver.FindElements(PaginationElementsAfterCurrentNotNextButton).Any())
                 {
+                    currentPage++;
                     // Click the "Next" button to go to the next page
                     GoToNextPage();
                     WaitForProductsToLoad();
-                    currentPage++;
                     isNextPageAvailable = true;
                 }
                 else isNextPageAvailable = false;
@@ -264,15 +268,9 @@ namespace www.menkind.co.uk.Pages
             Logger.Info("Page fully loaded with products.");
         }
 
-        int GoToNextPageRepeats = 1;
         private void GoToNextPage()
         {
             ScrollToElementWithActions(PaginationNextItem);
-            GoToNextPageRepeats++;
-            if (GoToNextPageRepeats >15) 
-            {
-                Thread.Sleep(2000);
-            }
             var nextButton = WaitForElementToBeClickable(PaginationNextItem);
             nextButton.Click();
             Logger.Info("Navigated to the next page.");
@@ -283,6 +281,7 @@ namespace www.menkind.co.uk.Pages
         public bool ValidateProductPrices(decimal? maxPrice)
         {
             // Extract prices using the ExtractPrice method
+            WaitForProductsToLoad();
             var prices = Driver.FindElements(ProductPrices)
                                .Select(e => ExtractPrice(e.Text))
                                .ToList();
