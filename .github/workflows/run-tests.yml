@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - refactoring
+      - driver_factory
 permissions:
   contents: write
 
