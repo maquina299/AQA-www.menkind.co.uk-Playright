@@ -124,7 +124,9 @@ namespace www.menkind.co.uk.Base
         }
         public static void EnsureScreenshotsDirectoryExists()
         {
-            string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
+            //string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
+            string screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
+
 
             // Check if the directory exists
             if (!Directory.Exists(screenshotsFolder))
@@ -156,7 +158,8 @@ namespace www.menkind.co.uk.Base
                 Screenshot screenshot = screenshotDriver.GetScreenshot();
 
                 // Save the screenshot to a specific file path
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots", fileName);
+                //string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots", fileName);
+                string filePath = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots", fileName);
 
                 screenshot.SaveAsFile(filePath);
 
