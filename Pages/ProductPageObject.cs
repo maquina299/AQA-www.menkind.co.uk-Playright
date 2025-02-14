@@ -21,12 +21,12 @@ namespace www.menkind.co.uk.Pages
         public void AddToBasket()
         {
             ScrollToElementWithActions(AddToBasketButton);
-            WaitForElementToBeClickable(AddToBasketButton).Click();
+            /*WaitForElementToBeClickable(AddToBasketButton).Click();
 
-           // WaitForElementToBeClickable(SubmitAdding).Click();
+            WaitForElementToBeClickable(SubmitAdding).Click();
 
-           // WaitForElementToBeVisible(BasketIcon);
-
+            WaitForElementToBeVisible(BasketIcon);
+            */
             Logger.Debug("Clicked 'Add to Basket' button.");
         }
 
