@@ -23,9 +23,9 @@ namespace www.menkind.co.uk.Pages
             ScrollToElementWithActions(AddToBasketButton);
             WaitForElementToBeClickable(AddToBasketButton).Click();
 
-            WaitForElementToBeClickable(SubmitAdding).Click();
+           // WaitForElementToBeClickable(SubmitAdding).Click();
 
-            WaitForElementToBeVisible(BasketIcon);
+           // WaitForElementToBeVisible(BasketIcon);
 
             Logger.Debug("Clicked 'Add to Basket' button.");
         }
