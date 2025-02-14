@@ -20,17 +20,8 @@ namespace www.menkind.co.uk.Pages
         // Methods
         public void AddToBasket()
         {
-            IWebElement addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
-            Driver.ExecuteJavaScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
-            //((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
-
+            ScrollToElementWithActions(AddToBasketButton);
             WaitForElementToBeClickable(AddToBasketButton).Click();
-            WaitForElementToBeClickable(SubmitAdding).Click();
-
-
-            WaitForElementToBeVisible(BasketIcon);
-
-            Logger.Debug("Clicked 'Add to Basket' button.");
         }
 
         public bool IsCartUpdated()
