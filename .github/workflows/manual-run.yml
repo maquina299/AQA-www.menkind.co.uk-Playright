@@ -72,13 +72,22 @@ jobs:
       with:
         name: test-results
         path: TestResults
+    
+    - name: List Screenshots Directory
+      run: |
+        echo "Listing contents of $(pwd):"
+        ls -al
+        echo "Listing contents of Screenshots directory:"
+        ls -al ./Screenshots/
+
+
     - name: Upload Screenshots
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: screenshots
         path: ${{ env.GITHUB_WORKSPACE }}/Screenshots
-
+        if-no-files-found: ignore
 
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
