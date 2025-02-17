@@ -37,7 +37,7 @@ namespace www.menkind.co.uk.Tests
             // Step 3: Verify the item in the cart-summary API
             var cartSummaryResponse = productPage.GetCartSummary();
             Assert.That(cartSummaryResponse.ItemQuantities[TestData.AddedToTheCardProductId], Is.EqualTo(1), "Expected item not found in the cart.");
-
+          //  Assert.That(false, Is.True, "Failed assert for debugging");
             Logger.Debug("Test passed: Cart icon updated successfully.");
         }
 
@@ -60,8 +60,15 @@ namespace www.menkind.co.uk.Tests
 
             Logger.Debug("Test passed: OOS is displayed.");
         }
+        [Test]
+        [Category("Smoke")]
+        [AllureSubSuite("Add to Cart")]
+        public void ScreenshotTest()
+        {
+            productPage.TakeScreenshot();
+        }
 
-        [TearDown]
+            [TearDown]
         public void TearDown()
         {
             DriverFactory.DisposeCurrentDriver(productPage); // ✅ Centralized cleanup for all drivers

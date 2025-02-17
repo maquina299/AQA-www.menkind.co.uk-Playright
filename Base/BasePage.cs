@@ -122,11 +122,21 @@ namespace www.menkind.co.uk.Base
             actions.MoveToElement(element).Perform();
             WaitForElementToBeVisible(elementLocator);
         }
-        public static void EnsureScreenshotsDirectoryExists()
+        public static string EnsureScreenshotsDirectoryExists()
         {
-            //string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
-            string screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
+            string screenshotsFolder;
 
+            if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            {
+            screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
+            }
+            else
+            {
+            screenshotsFolder = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName, "Screenshots");
+            }
+            //string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
+            // string screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
+            Logger.Debug(screenshotsFolder);
 
             // Check if the directory exists
             if (!Directory.Exists(screenshotsFolder))
@@ -139,28 +149,33 @@ namespace www.menkind.co.uk.Base
             {
                 Logger.Info($"Screenshots directory already exists at: {screenshotsFolder}");
             }
+            return screenshotsFolder;
         }
-        public void TakeScreenshot(string fileName = null)
+        public void TakeScreenshot()
         {
+            EnsureScreenshotsDirectoryExists();
             try
             {
-                if (string.IsNullOrEmpty(fileName))
+               /* if (Driver == null)
                 {
-                    fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-                }
+                    Logger.Error("WebDriver is null. Cannot capture screenshot.");
+                    return;
+                }*/
 
-                EnsureScreenshotsDirectoryExists();
 
-                // Create a screenshot object using the WebDriver instance
+                  string fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}";
+                    Logger.Debug($"File name generated: {fileName}");
+                
+                
+                // Get the Screenshots directory
+                string screenshotsFolder = EnsureScreenshotsDirectoryExists();
+
+                // Construct the full file path
+                string filePath = Path.Combine(screenshotsFolder, fileName);
+
+                // Capture the screenshot
                 ITakesScreenshot screenshotDriver = (ITakesScreenshot)Driver;
-
-                // Capture screenshot
                 Screenshot screenshot = screenshotDriver.GetScreenshot();
-
-                // Save the screenshot to a specific file path
-                //string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots", fileName);
-                string filePath = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots", fileName);
-
                 screenshot.SaveAsFile(filePath);
 
                 Logger.Info($"Screenshot saved to: {filePath}");
@@ -169,8 +184,8 @@ namespace www.menkind.co.uk.Base
             {
                 Logger.Error(screenshotEx, "Failed to capture screenshot");
             }
-
-
         }
+
+
     }
 }
