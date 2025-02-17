@@ -68,11 +68,10 @@ namespace www.menkind.co.uk.Tests
             {
                 productPage.TakeScreenshot();
             }
-            catch (Exception e]
+            catch (Exception e) { Logger.Debug($"{e}"); }
             }
-        }
-
-            [TearDown]
+        
+        [TearDown]
         public void TearDown()
         {
             DriverFactory.DisposeCurrentDriver(productPage); // ✅ Centralized cleanup for all drivers
