@@ -54,6 +54,7 @@ jobs:
       with:
         name: screenshots
         path: ${{ env.GITHUB_WORKSPACE }}/Screenshots
+        if-no-files-found: ignore
 
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
