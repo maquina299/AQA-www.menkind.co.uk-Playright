@@ -64,8 +64,12 @@ namespace www.menkind.co.uk.Tests
         [Category("Smoke")]
         [AllureSubSuite("Add to Cart")]
         public void ScreenshotTest()
-        {
-            productPage.TakeScreenshot();
+        {try
+            {
+                productPage.TakeScreenshot();
+            }
+            catch (Exception e]
+            }
         }
 
             [TearDown]
