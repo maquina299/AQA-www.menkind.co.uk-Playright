@@ -34,7 +34,7 @@ jobs:
     
     - name: Create Screenshots Directory
       run: |
-          mkdir -p "${{ GITHUB_WORKSPACE }}/Screenshots"
+          mkdir -p "${{ github.workspace }}/Screenshots"
           echo "Created Screenshots directory at ${{ github.workspace }}/Screenshots"
 
     - name: Run Smoke Tests
@@ -59,7 +59,7 @@ jobs:
         echo "Listing contents of $(pwd):"
         ls -al
         echo "Listing contents of Screenshots directory:"
-        screenshots_dir="${GITHUB_WORKSPACE}/Screenshots"
+        screenshots_dir="${github.workspace}/Screenshots"
         echo "Full path to Screenshots directory: $screenshots_dir"
         ls -al "$screenshots_dir"
 
@@ -68,7 +68,7 @@ jobs:
       if: always()
       with:
         name: screenshots
-        path: screenshots_dir
+        path: $screenshots_dir
         echo "Full path to Screenshots directory: $"{screenshots_dir}"}"
         if-no-files-found: ignore
 
