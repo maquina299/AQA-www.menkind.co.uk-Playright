@@ -34,7 +34,7 @@ jobs:
     
     - name: Create Screenshots Directory
       run: |
-          mkdir -p ${{ github_workspace }}/Screenshots
+          mkdir -p ${{ GITHUB_WORKSPACE }}/Screenshots
           echo "Created Screenshots directory at ${{ github.workspace }}/Screenshots"
 
     - name: Run Smoke Tests
