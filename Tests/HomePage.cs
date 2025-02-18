@@ -31,7 +31,6 @@ namespace www.menkind.co.uk.Tests
         [AllureTms("TMS-xx")]
         public void HomePageLoadsSuccessfully()
         {
-            // CHANGED: Use _basePage.Driver to pass the driver to the page object.
             Logger.Debug("Executing HomePageLoadsSuccessfully test");
             Assert.Multiple(() =>
             {

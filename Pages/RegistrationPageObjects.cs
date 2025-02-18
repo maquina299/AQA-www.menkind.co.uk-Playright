@@ -4,7 +4,6 @@
     {
         public RegistrationPageObjects(IWebDriver driver) : base() { }
 
-        // 🔹 Store locators as `By` instead of direct element access
         private By SuccessMessage = By.CssSelector("h1.page-heading.classyunicodedone");
         private By EmailField = By.Id("FormField_1_input");
         private By PasswordField = By.Id("FormField_2_input");
@@ -20,7 +19,6 @@
         private By SubmitButton = By.CssSelector("input[type='submit'][value='Create Account']");
         private By AccountLink = By.CssSelector("a.header__sign-in");
 
-        // ✅ Use explicit waits for stability and reliability
         public bool IsUserLoggedIn()
         {
             return WaitForElementToBeVisible(AccountLink, TimeSpan.FromSeconds(5)).Displayed;

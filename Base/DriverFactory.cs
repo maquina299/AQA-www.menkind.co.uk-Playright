@@ -9,8 +9,6 @@ namespace www.menkind.co.uk.Base
     public static class DriverFactory
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-        // ✅ Use thread-safe dictionary to track WebDrivers per test thread
         private static readonly ConcurrentDictionary<int, IWebDriver> _drivers = new();
         static DriverFactory()
         {
@@ -50,7 +48,6 @@ namespace www.menkind.co.uk.Base
             int threadId = Environment.CurrentManagedThreadId;
             Logger.Debug($"WebDriver assigned for thread {threadId}.");
 
-            // ✅ Ensure only one WebDriver is assigned per test thread
             if (!_drivers.ContainsKey(threadId))
             {
                 _drivers[threadId] = driver;
@@ -65,8 +62,6 @@ namespace www.menkind.co.uk.Base
             Logger.Debug("WebDriver initialized successfully.");
 
             var basePage = new BasePage();
-
-            // ✅ Ensure correct URL is used
             string targetUrl = string.IsNullOrEmpty(url) ? TestData.HomePageURL : url;
             Logger.Debug($"Navigating to {targetUrl}");
             basePage.NavigateToUrl(targetUrl);

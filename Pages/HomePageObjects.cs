@@ -5,7 +5,6 @@ namespace www.menkind.co.uk.Pages
 {
     public class HomePageObject : BasePage
     {
-        // CHANGED: Use the overloaded BasePage constructor that accepts an existing driver.
         public HomePageObject(IWebDriver driver) : base() { }
 
         private By LogoSelector => By.CssSelector("a.header__logo");
@@ -23,7 +22,6 @@ namespace www.menkind.co.uk.Pages
 
         public bool IsLogoDisplayed()
         {
-            // CHANGED: Use the public Driver property instead of the private _driver.
             return Driver.FindElement(LogoSelector).Displayed;
         }
 
@@ -63,7 +61,6 @@ namespace www.menkind.co.uk.Pages
 
         public string GetTitle()
         {
-            // CHANGED: Use Driver property.
             return Driver.Title;
         }
 

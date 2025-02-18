@@ -43,10 +43,6 @@ namespace www.menkind.co.uk.Pages
             }
         }
 
-        /* public bool IsPriceAmountPresent()
-         {
-             return Driver.FindElements(PriceAmount).Count > 0;
-         }*/
         public bool IsPriceAmountPresent()
         {
             bool isPresent = Driver.FindElements(PriceAmount).Count > 0;
@@ -89,7 +85,8 @@ namespace www.menkind.co.uk.Pages
             [JsonProperty("total_price")]
             public decimal TotalPrice { get; set; }
         }
-        public class AddResponse //Added product response data
+        //Added product response data
+        public class AddResponse 
         {
           
             public class CartSummaryResponse

@@ -9,10 +9,10 @@ namespace www.menkind.co.uk.Base
     {
         protected static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        // ✅ WebDriver is now retrieved from DriverFactory dynamically
+        //  WebDriver is retrieved from DriverFactory dynamically
         public IWebDriver Driver => DriverFactory.GetCurrentDriver();
 
-        // ✅ WebDriverWait is now dynamically created to ensure it's always available
+        //  WebDriverWait is dynamically created to ensure it's always available
         private readonly Lazy<WebDriverWait> _wait = new(() =>
             new WebDriverWait(DriverFactory.GetCurrentDriver(), TimeSpan.FromSeconds(5)));
 
@@ -20,7 +20,6 @@ namespace www.menkind.co.uk.Base
 
         public BasePage() { }
 
-        // ✅ Navigate to a URL (Ensures WebDriver is valid before navigation)
         public void NavigateToUrl(string url)
         {
             if (Driver == null)
@@ -33,21 +32,18 @@ namespace www.menkind.co.uk.Base
             Driver.Navigate().GoToUrl(url);
         }
 
-        // ✅ Default wait for element to be visible
         public IWebElement WaitForElementToBeVisible(By locator, TimeSpan? timeout = null)
         {
             return new WebDriverWait(Driver, timeout ?? TimeSpan.FromSeconds(5))
                         .Until(ExpectedConditions.ElementIsVisible(locator));
         }
 
-        // ✅ Default wait for element to be clickable
         public IWebElement WaitForElementToBeClickable(By locator, TimeSpan? timeout = null)
         {
             return new WebDriverWait(Driver, timeout ?? TimeSpan.FromSeconds(3))
                         .Until(ExpectedConditions.ElementToBeClickable(locator));
         }
 
-        // ✅ Improved Modal Handling (Handles popups only if elements exist)
         public void HandleModals()
         {
             if (Driver == null)
@@ -134,8 +130,6 @@ namespace www.menkind.co.uk.Base
             {
             screenshotsFolder = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName, "Screenshots");
             }
-            //string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
-            // string screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
             Logger.Debug(screenshotsFolder);
 
             // Check if the directory exists
@@ -156,17 +150,8 @@ namespace www.menkind.co.uk.Base
             EnsureScreenshotsDirectoryExists();
             try
             {
-               /* if (Driver == null)
-                {
-                    Logger.Error("WebDriver is null. Cannot capture screenshot.");
-                    return;
-                }*/
-
-
-                  string fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-                    Logger.Debug($"File name generated: {fileName}");
-                
-                
+                string fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                Logger.Debug($"File name generated: {fileName}");
                 // Get the Screenshots directory
                 string screenshotsFolder = EnsureScreenshotsDirectoryExists();
 

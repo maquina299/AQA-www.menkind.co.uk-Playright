@@ -47,8 +47,6 @@ namespace www.menkind.co.uk.Tests
         public void SoldItem_ShouldCauseOOSmessage()
         {
             Logger.Debug("Starting test: SoldItem_ShouldCauseOOSMessage");
-
-            // ✅ No need for `new BasePage(false)`, just navigate to the sold-out product
             _basePage.NavigateToUrl(TestData.SoldProductPageURL);
             Assert.Multiple(() =>
             {
@@ -74,7 +72,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            DriverFactory.DisposeCurrentDriver(productPage); // ✅ Centralized cleanup for all drivers
+            DriverFactory.DisposeCurrentDriver(productPage); 
         }
     }
 }
