@@ -31,6 +31,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
+    
+    - name: Create Screenshots Directory
+      run: |
+          mkdir -p ${{ github.workspace }}/Screenshots
+          echo "Created Screenshots directory at ${{ github.workspace }}/Screenshots"
 
     - name: Run Smoke Tests
       run:  dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Smoke"
@@ -48,13 +53,13 @@ jobs:
         name: test-results
         path: TestResults
 
-    
+
     - name: List Screenshots Directory
       run: |
         echo "Listing contents of $(pwd):"
         ls -al
         echo "Listing contents of Screenshots directory:"
-        screenshots_dir="${GITHUB_WORKSPACE}/Screenshots"
+        screenshots_dir="${GITHUB.WORKSPACE}/Screenshots"
         echo "Full path to Screenshots directory: $screenshots_dir"
         ls -al "$screenshots_dir"
 
@@ -63,7 +68,7 @@ jobs:
       if: always()
       with:
         name: screenshots
-        path: "$screenshots_dir"
+        path: $screenshots_dir
         echo "Full path to Screenshots directory: $"{screenshots_dir}"}"
         if-no-files-found: ignore
 
