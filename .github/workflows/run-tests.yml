@@ -64,6 +64,7 @@ jobs:
       with:
         name: screenshots
         path: ${{ env.GITHUB_WORKSPACE }}/Screenshots
+        echo "Full path to Screenshots directory: ${{ env.GITHUB_WORKSPACE }}/Screenshots"
         if-no-files-found: ignore
 
     - name: Generate Allure Report
