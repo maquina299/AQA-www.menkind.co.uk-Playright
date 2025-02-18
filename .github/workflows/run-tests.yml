@@ -34,8 +34,8 @@ jobs:
     
     - name: Create Screenshots Directory
       run: |
-          mkdir -p "${{ github.workspace }}/Screenshots"
-          echo "Created Screenshots directory at ${{ github.workspace }}/Screenshots"
+          mkdir -p "${{github.workspace}}/Screenshots"
+          echo "Created Screenshots directory at ${{github.workspace}}/Screenshots"
 
     - name: Run Smoke Tests
       run:  dotnet test --logger "trx;LogFileName=TestResults.trx" --results-directory allure-results --filter "Category=Smoke"
@@ -59,7 +59,7 @@ jobs:
         echo "Listing contents of $(pwd):"
         ls -al
         echo "Listing contents of Screenshots directory:"
-        screenshots_dir="${github.workspace}/Screenshots"
+        screenshots_dir="${{github.workspace}}/Screenshots"
         echo "Full path to Screenshots directory: $screenshots_dir"
         ls -al "$screenshots_dir"
 
