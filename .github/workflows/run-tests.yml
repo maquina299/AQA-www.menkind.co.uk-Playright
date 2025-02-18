@@ -64,7 +64,7 @@ jobs:
       with:
         name: screenshots
         path: "$screenshots_dir"
-        echo "Full path to Screenshots directory: $screenshots_dir"
+        echo "Full path to Screenshots directory: $"{screenshots_dir}"}"
         if-no-files-found: ignore
 
     - name: Generate Allure Report
