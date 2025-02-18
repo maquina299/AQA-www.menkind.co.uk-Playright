@@ -33,7 +33,7 @@ namespace www.menkind.co.uk.Tests
         {
             Logger.Info("Started to fill in required registration fields");
 
-            // Step 1: Fill in all the registration fields
+            // Fill in all the registration fields
             registrationPage.EnterFirstName("TestFirstName");
             registrationPage.EnterLastName("TestLastName");
             registrationPage.EnterEmail(registrationPage.GenerateUniqueEmail());
@@ -46,11 +46,11 @@ namespace www.menkind.co.uk.Tests
             registrationPage.EnterCounty("Greater London");
             Logger.Info("Test data input completed");
 
-            // Step 2: Submit Registration
+            // Submit Registration
             registrationPage.Submit();
             Logger.Info("Registration submitted");
 
-            // Step 3: Verify Registration Success
+            // Verify Registration Success
             Logger.Info("Executing Test_SuccessMessage and checking user's login status after registration");
 
             Assert.Multiple(() =>
@@ -66,7 +66,7 @@ namespace www.menkind.co.uk.Tests
         [TearDown]
         public void TearDown()
         {
-            DriverFactory.DisposeCurrentDriver(registrationPage); // ✅ Centralized WebDriver cleanup
+            DriverFactory.DisposeCurrentDriver(registrationPage);
         }
     }
 }

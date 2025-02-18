@@ -20,16 +20,13 @@ namespace www.menkind.co.uk.Pages
         // Methods
         public void AddToBasket()
         {
-            IWebElement addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
-            Driver.ExecuteJavaScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
-            //((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", addToCartButton);
-
+            ScrollToElementWithActions(AddToBasketButton);
             WaitForElementToBeClickable(AddToBasketButton).Click();
+
             WaitForElementToBeClickable(SubmitAdding).Click();
 
-
             WaitForElementToBeVisible(BasketIcon);
-
+           
             Logger.Debug("Clicked 'Add to Basket' button.");
         }
 
@@ -46,10 +43,6 @@ namespace www.menkind.co.uk.Pages
             }
         }
 
-        /* public bool IsPriceAmountPresent()
-         {
-             return Driver.FindElements(PriceAmount).Count > 0;
-         }*/
         public bool IsPriceAmountPresent()
         {
             bool isPresent = Driver.FindElements(PriceAmount).Count > 0;
@@ -77,7 +70,7 @@ namespace www.menkind.co.uk.Pages
             }
 
             Logger.Debug($"Cart summary response: {response?.Content}");
-            return JsonConvert.DeserializeObject<CartSummaryResponse>(response?.Content);
+            return JsonConvert.DeserializeObject<CartSummaryResponse>(response!.Content!)!;
         }
 
         // Model for the Cart Summary API response
@@ -92,7 +85,8 @@ namespace www.menkind.co.uk.Pages
             [JsonProperty("total_price")]
             public decimal TotalPrice { get; set; }
         }
-        public class AddResponse //Added product response data
+        //Added product response data
+        public class AddResponse 
         {
           
             public class CartSummaryResponse
@@ -124,7 +118,7 @@ namespace www.menkind.co.uk.Pages
             foreach (var cookie in cookies)
             {
                 // Add each cookie to the request
-                request.AddCookie(cookie.Name, cookie.Value, null, "www.menkind.co.uk");
+                request.AddCookie(cookie.Name, cookie.Value, null!, "www.menkind.co.uk");
                 Logger.Debug($"Added cookie: {cookie.Name} = {cookie.Value}");
             }
         }

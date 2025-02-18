@@ -33,8 +33,6 @@ namespace www.menkind.co.uk.Pages
 #region Search frame tests
         public void EnterSearchQuery(string query)
         {
-            //Actions actions = new Actions(Driver);
-            //actions.SendKeys(Keys.Home).Perform();
             var searchBox = WaitForElementToBeVisible(SearchBox);
             searchBox.Clear();
             searchBox.SendKeys(query);
@@ -59,8 +57,6 @@ namespace www.menkind.co.uk.Pages
                 Logger.Warn("Search results frame did not appear within the expected time.");
                 return false;
             }
-            /*var frames = Driver.FindElements(SearchResultsFrame);
-            return frames.Count > 0 && frames[0].Displayed;*/
         }
 
 
@@ -172,7 +168,7 @@ namespace www.menkind.co.uk.Pages
                 throw;
             }
         }
-        // ✅ Step 3: Capture first filter details (returns item count & max price)
+        // Capture first filter details (returns item count & max price)
         public (int itemCount, decimal? maxPrice) GetFirstFilterDetails()
         {
             WaitForElementToBeVisible(PriceFilter);
@@ -218,7 +214,7 @@ namespace www.menkind.co.uk.Pages
             Logger.Info("Filter applied.");
         }
 
-        // ✅ Step 5: Get number of displayed items
+        // Get number of displayed items
         public (int, bool) GetDisplayedProductCount(decimal? maxPrice)
         {
             int totalProductCount = 0;
@@ -234,7 +230,6 @@ namespace www.menkind.co.uk.Pages
                 var products = Driver.FindElements(ProductItems);
                 totalProductCount += products.Count;
                 Logger.Info($"Page {currentPage}: Found {products.Count} products. Total so far: {totalProductCount}. Page URL: {Driver.Url}");
-                //WaitForProductsToLoad();
 
                 allPagePricesValid = ValidateProductPrices(maxPrice);
                 if (currentPage==2)
@@ -277,7 +272,7 @@ namespace www.menkind.co.uk.Pages
         }
 
 
-        // ✅ Step 6: Validate product prices
+        // Validate product prices
         public bool ValidateProductPrices(decimal? maxPrice)
         {
             // Extract prices using the ExtractPrice method
@@ -308,12 +303,12 @@ namespace www.menkind.co.uk.Pages
         }
 
 
-        // 🔹 Extracts price from text (e.g., "£10 and under" → 10.00)
+        // Extracts price from text
         private static decimal? ExtractPrice(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                return null;  // If empty, return null
+                return null;
             }
 
             var match = Regex.Match(text, @"£(\d+(\.\d{1,2})?)");

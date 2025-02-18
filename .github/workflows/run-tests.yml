@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - refactoring
+      - driver_factory
 permissions:
   contents: write
 
@@ -46,7 +46,25 @@ jobs:
       if: always()
       with:
         name: test-results
-        path: TestResults
+        path: allure-results
+
+
+    - name: List Screenshots Directory
+      run: |
+        echo "Listing contents of $(pwd):"
+        ls -al
+        echo "Listing contents of Screenshots directory:"
+        screenshots_dir="${{github.workspace}}/Screenshots"
+        echo "Full path to Screenshots directory: $screenshots_dir"
+        ls -al "$screenshots_dir"
+
+    - name: Upload Screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: screenshots
+        path: ${{github.workspace}}/Screenshots
+        if-no-files-found: ignore
 
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
