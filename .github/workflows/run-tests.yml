@@ -68,8 +68,8 @@ jobs:
       if: always()
       with:
         name: screenshots
-        path: $screenshots_dir
-        echo "Full path to Screenshots directory: $"{screenshots_dir}"}"
+        path: ${{github.workspace}}/Screenshots
+        echo "Full path to Screenshots directory: ${{github.workspace}}/Screenshots"
         if-no-files-found: ignore
 
     - name: Generate Allure Report
