@@ -48,12 +48,15 @@ jobs:
         name: test-results
         path: TestResults
 
+    
     - name: List Screenshots Directory
       run: |
         echo "Listing contents of $(pwd):"
         ls -al
         echo "Listing contents of Screenshots directory:"
-        ls -al ${{ env.GITHUB_WORKSPACE }}/Screenshots
+        screenshots_dir="${GITHUB_WORKSPACE}/Screenshots"
+        echo "Full path to Screenshots directory: $screenshots_dir"
+        ls -al "$screenshots_dir"
 
     - name: Upload Screenshots
       uses: actions/upload-artifact@v4
