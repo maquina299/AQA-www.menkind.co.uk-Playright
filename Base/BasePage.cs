@@ -163,7 +163,7 @@ namespace www.menkind.co.uk.Base
                 }*/
 
 
-                  string fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}";
+                  string fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
                     Logger.Debug($"File name generated: {fileName}");
                 
                 
