@@ -53,7 +53,7 @@ jobs:
         echo "Listing contents of $(pwd):"
         ls -al
         echo "Listing contents of Screenshots directory:"
-        ls -al ./Screenshots/
+        ls -al ${{ env.GITHUB_WORKSPACE }}/Screenshots
 
     - name: Upload Screenshots
       uses: actions/upload-artifact@v4
