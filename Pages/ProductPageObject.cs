@@ -74,7 +74,7 @@ namespace www.menkind.co.uk.Pages
             }
 
             Logger.Debug($"Cart summary response: {response?.Content}");
-            return JsonConvert.DeserializeObject<CartSummaryResponse>(response?.Content);
+            return JsonConvert.DeserializeObject<CartSummaryResponse>(response!.Content!)!;
         }
 
         // Model for the Cart Summary API response
@@ -121,7 +121,7 @@ namespace www.menkind.co.uk.Pages
             foreach (var cookie in cookies)
             {
                 // Add each cookie to the request
-                request.AddCookie(cookie.Name, cookie.Value, null, "www.menkind.co.uk");
+                request.AddCookie(cookie.Name, cookie.Value, null!, "www.menkind.co.uk");
                 Logger.Debug($"Added cookie: {cookie.Name} = {cookie.Value}");
             }
         }

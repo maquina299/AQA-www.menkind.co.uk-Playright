@@ -128,11 +128,11 @@ namespace www.menkind.co.uk.Base
 
             if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
             {
-            screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
+            screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")!, "Screenshots");
             }
             else
             {
-            screenshotsFolder = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName, "Screenshots");
+            screenshotsFolder = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName, "Screenshots");
             }
             //string screenshotsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots");
             // string screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "Screenshots");
