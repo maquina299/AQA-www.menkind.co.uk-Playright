@@ -38,21 +38,6 @@ jobs:
       env:
        DOTNET_ENVIRONMENT: Test
 
-    - name: List allure-results directory contents
-      run: ls -la allure-results
-     # Determine the next directory number
-    - name: Determine next directory number
-      id: next_dir
-      run: |
-         # List existing directories in allure-history
-         dirs=$(ls ${{github.workspace}}/allure-history)
-         # Find the highest number and increment it
-         next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
-         next_dir=$((next_dir + 1))
-         echo "Next directory number: $next_dir"
-         echo "next_dir=$next_dir" >> $GITHUB_ENV
-
-
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -93,7 +78,23 @@ jobs:
         gh_pages: gh-pages
         allure_history: allure-history
         keep_reports: 20
+
      # Copy the history folder to the new directory
+    - name: List allure-results directory contents
+      run: ls -la allure-results
+
+     # Determine the next directory number
+    - name: Determine next directory number
+      id: next_dir
+      run: |
+         # List existing directories in allure-history
+         dirs=$(ls ${{github.workspace}}/allure-results)
+         # Find the highest number and increment it
+         next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
+         next_dir=$((next_dir + 1))
+         echo "Next directory number: $next_dir"
+         echo "next_dir=$next_dir" >> $GITHUB_ENV
+
     - name: Copy history to new directory
       run: |
         cp -r allure-results/history/* gh-pages/${{ env.next_dir }}/history/
