@@ -63,23 +63,23 @@ jobs:
         name: screenshots
         path: ${{github.workspace}}/Screenshots
         if-no-files-found: ignore
-
-     # Determine the next directory number
-    - name: Determine next directory number
-      id: next_dir
-      run: |
-         # List existing directories in allure-history
-         dirs=$(ls ./)
-         # Find the highest number and increment it
-         next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
-         next_dir=$((next_dir + 1))
-         echo "Next directory number: $next_dir"
-         echo "next_dir=$next_dir" >> $GITHUB_ENV
     
     - name: Checkout gh-pages branch
       uses: actions/checkout@v2
       with:
         ref: gh-pages
+     # Determine the next directory number
+    - name: Determine next directory number
+      id: next_dir
+      run: |
+         # List existing directories in allure-history
+         dirs=$(ls gh-pages)
+         # Find the highest number and increment it
+         next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
+         next_dir=$((next_dir + 1))
+         echo "Next directory number: $next_dir"
+         echo "next_dir=$next_dir" >> $GITHUB_ENV
+
 
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
