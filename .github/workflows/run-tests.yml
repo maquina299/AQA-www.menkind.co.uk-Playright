@@ -63,6 +63,18 @@ jobs:
         name: screenshots
         path: ${{github.workspace}}/Screenshots
         if-no-files-found: ignore
+
+     # Determine the next directory number
+    - name: Determine next directory number
+      id: next_dir
+      run: |
+         # List existing directories in allure-history
+         dirs=$(ls gp-pages)
+         # Find the highest number and increment it
+         next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
+         next_dir=$((next_dir + 1))
+         echo "Next directory number: $next_dir"
+         echo "next_dir=$next_dir" >> $GITHUB_ENV
     
     - name: Checkout gh-pages branch
       uses: actions/checkout@v2
@@ -81,19 +93,9 @@ jobs:
 
      # Copy the history folder to the new directory
     - name: List allure-results directory contents
-      run: ls -la allure-results
+      run: ls -la ${{ env.next_dir }}
 
-     # Determine the next directory number
-    - name: Determine next directory number
-      id: next_dir
-      run: |
-         # List existing directories in allure-history
-         dirs=$(ls ${{github.workspace}}/allure-results)
-         # Find the highest number and increment it
-         next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
-         next_dir=$((next_dir + 1))
-         echo "Next directory number: $next_dir"
-         echo "next_dir=$next_dir" >> $GITHUB_ENV
+
 
     - name: Copy history to new directory
       run: |
