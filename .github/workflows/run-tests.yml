@@ -92,7 +92,7 @@ jobs:
         keep_reports: 20
 
      # Copy the history folder to the new directory
-    - name: List ?????? directory contents
+    - name: List root directory contents
       run: ls -la ${{github.workspace}}
 
 
