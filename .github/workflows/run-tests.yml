@@ -45,7 +45,7 @@ jobs:
       id: next_dir
       run: |
          # List existing directories in allure-history
-         dirs=$(ls gh-pages/allure-history)
+         dirs=$(ls ${{github.workspace}}/allure-history)
          # Find the highest number and increment it
          next_dir=$(echo "$dirs" | awk -F'/' '{print $NF}' | sort -n | tail -n 1)
          next_dir=$((next_dir + 1))
