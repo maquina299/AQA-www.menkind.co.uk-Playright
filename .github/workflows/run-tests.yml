@@ -99,7 +99,7 @@ jobs:
 
     - name: Copy history to new directory
       run: |
-        cp -r allure-results/history/* gh-pages/${{ env.next_dir }}/history/
+        cp -r ${{github.workspace}}/allure-results/history/* gh-pages/${{ env.next_dir }}/history/
 
     - name: Deploy report to Github Pages
       if: always()
