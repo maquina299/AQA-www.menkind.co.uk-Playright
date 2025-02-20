@@ -93,7 +93,8 @@ jobs:
 
      # Copy the history folder to the new directory
     - name: List root directory contents
-      run: ls -la ${{github.workspace}}
+      run: ls -la ${{github.workspace}}/allure-results
+
 
 
 
