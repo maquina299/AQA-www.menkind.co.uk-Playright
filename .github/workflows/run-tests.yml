@@ -91,16 +91,12 @@ jobs:
         allure_history: allure-history
         keep_reports: 20
 
-     # Copy the history folder to the new directory
     - name: List root directory contents
       run: ls -la ${{github.workspace}}/allure-results
 
-
-
-
-    - name: Copy history to new directory
-      run: |
-        cp -r allure-results/history/ gh-pages/${{ env.next_dir }}/history/
+  #  - name: Copy history to new directory
+  #    run: |
+  #      cp -r allure-results/history/ gh-pages/${{ env.next_dir }}/history/
 
     - name: Deploy report to Github Pages
       if: always()
