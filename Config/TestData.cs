@@ -22,5 +22,15 @@
         };
         public static readonly string SearchPageURL = $"https://www.menkind.co.uk/search.php?search_query={SearchQuery}";
 
+
+#region API Data    
+        public static readonly string ApiLoginURL = "https://www.menkind.co.uk/login.php?action=check_login";
+        public static readonly string SuccesfullyLoggedInPageHeader = "<h1 class=\"page-heading\">Orders</h1>";
+        //public static readonly string UnsuccesfullyLoggedInPageHeader = "<h1 class=\"page-heading\">Sign In</h1>";
+
+
+
+
+        #endregion
     }
 }
