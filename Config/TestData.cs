@@ -6,7 +6,7 @@
         public static readonly string ValidEmail = "testuser_cd17ee00-86e6-4e48-acbd-cc5835d8be2b@example.com";
         public static readonly string ValidPassword = "TestPassword123!";
         //public static readonly string HomePageURL = "https://www.google.com";
-
+        public static readonly string ApiBaseURL = "https://www.menkind.co.uk/";
         public static readonly string HomePageURL = "https://www.menkind.co.uk";
         public static readonly string RegistrationPageURL = "https://www.menkind.co.uk/login.php?action=create_account";
         public static readonly string ProductPageURL = "https://www.menkind.co.uk/draft-wizard-ultrasonic-frothing-beer-dispenser";
@@ -27,7 +27,20 @@
         public static readonly string ApiLoginURL = "https://www.menkind.co.uk/login.php?action=check_login";
         public static readonly string SuccesfullyLoggedInPageHeader = "<h1 class=\"page-heading\">Orders</h1>";
         //public static readonly string UnsuccesfullyLoggedInPageHeader = "<h1 class=\"page-heading\">Sign In</h1>";
+        public static readonly string CartSummaryAPI = "https://www.menkind.co.uk/api/storefront/cart-summary";
 
+        // Expected JSON keys in cart summary response
+        public static readonly List <string> ExpectedCartSummaryKeys =
+        [
+            "id",
+            "channel_id",
+            "currency",
+            "line_item_count",
+            "total_price",
+            "total_quantity",
+            "item_quantities",
+            "promotions"
+        ];
 
 
 

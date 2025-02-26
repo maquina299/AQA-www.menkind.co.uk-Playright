@@ -1,7 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using NLog;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using www.menkind.co.uk.Tests;
 
 namespace www.menkind.co.uk.Base

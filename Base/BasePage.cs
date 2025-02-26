@@ -1,7 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using NLog;
-using OpenQA.Selenium.Interactions;
+﻿using OpenQA.Selenium.Interactions;
 
 namespace www.menkind.co.uk.Base
 {
