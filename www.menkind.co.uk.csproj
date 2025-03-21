@@ -59,5 +59,8 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+	<ItemGroup>
+    <None Include=".github\**\*" />
+</ItemGroup>
 
 </Project>
