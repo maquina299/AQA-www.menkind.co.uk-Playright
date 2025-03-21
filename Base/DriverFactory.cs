@@ -5,7 +5,14 @@ namespace www.menkind.co.uk.Base
 {
     public static class DriverFactory
     {
+        // Private logger, only accessible through the GetLogger method
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        // Public property to access Logger
+        public static Logger GetLogger()
+        {
+            return Logger;
+        }
         private static readonly ConcurrentDictionary<int, IWebDriver> _drivers = new();
         static DriverFactory()
         {

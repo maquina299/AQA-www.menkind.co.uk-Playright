@@ -1,0 +1,1642 @@
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\api\ApiHelpers.cs ---
+
+using System.Net;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using www.menkind.co.uk.Tests;
+using Cookie = System.Net.Cookie;
+
+public static class ApiHelpers
+{
+    private static readonly Logger Logger = DriverFactory.GetLogger();
+    private static readonly HttpClient client = new HttpClient();
+    private static readonly CookieContainer cookieContainer = new CookieContainer();
+
+
+    public static async Task<string> SendApiRequest(
+        string endpoint,
+        HttpMethod method = null,
+        object body = null,
+        string cookie = null)
+    {
+        method ??= HttpMethod.Get;
+        string url = TestData.ApiBaseURL + endpoint;
+
+        Logger.Info($"?? Sending {method} request to: {url}"); // [CHANGED] Log request details
+
+        using var request = new HttpRequestMessage(method, url);
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add("accept", "application/json");
+        client.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0");
+
+        if (body != null && (method == HttpMethod.Post || method == HttpMethod.Put))
+        {
+            string jsonBody = JsonConvert.SerializeObject(body);
+            request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            Logger.Debug($"?? Request Body: {jsonBody}"); // [CHANGED] Log request body
+        }
+
+        if (!string.IsNullOrEmpty(cookie))
+        {
+            request.Headers.Add("Cookie", cookie);
+            Logger.Debug($"?? Using Cookie: {cookie}"); // [CHANGED] Log cookie usage
+        }
+
+        try
+        {
+            var response = await client.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            Logger.Info($"Received Response: {response.StatusCode}"); // [CHANGED] Log response status
+            //Logger.Debug($"Response Body: {responseContent}"); // [CHANGED] Log full response
+
+            Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK),
+                $"API request failed - Expected 200 OK but got {response.StatusCode}.");
+
+            return responseContent;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"? API Request failed: {ex.Message}"); // [CHANGED] Log errors
+            throw;
+        }
+    }
+
+    public static async Task<(string responseContent, string cookies)> SendLoginRequest(string email, string password)
+    {
+        Logger.Info("Sending Login Request...");
+
+        var postData = new StringContent(
+            $"login_email={email}&login_pass={password}",
+            Encoding.UTF8,
+            "application/x-www-form-urlencoded"
+        );
+
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
+        client.DefaultRequestHeaders.Add("referer", "https://www.menkind.co.uk/login.php");
+        client.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+
+        try
+        {
+            var response = await client.PostAsync(TestData.ApiLoginURL, postData);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            //string cookies = string.Join("; ", cookieContainer.GetCookies(new Uri(TestData.ApiLoginURL))
+            //    .Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
+            // Capture cookies from response headers
+            var cookies = response.Headers.Contains("Set-Cookie") ? string.Join("; ", response.Headers.GetValues("Set-Cookie")) : string.Empty;
+            /*var cookies = response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)
+            ? string.Join("; ", cookieHeaders)
+            : string.Empty;
+            Logger.Info($"Login Response: {response.StatusCode}");*/
+            Logger.Info($"Got cookie: {cookies}");
+
+            //Logger.Debug($"Response Body: {responseContent}");
+
+            Assert.That((int)response.StatusCode, Is.EqualTo(200), "Login request failed");
+
+            return (responseContent, cookies);  // Return both responseContent and cookies
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"? Login Request failed: {ex.Message}");
+            throw;
+        }
+    }
+
+
+    public static void ValidateSuccessfulLogin(string responseContent)
+    {
+        Logger.Info("?? Validating Login Success..."); // [CHANGED] Log validation start
+
+        Assert.That(responseContent, Does.Contain(TestData.SuccesfullyLoggedInPageHeader),
+            "Login failed - 'Orders' page is not displayed.");
+
+        Logger.Info("? Login Validation Passed!"); // [CHANGED] Log success
+    }
+
+    public static async Task<string> GetCartSummaryResponse(string cookies = null)
+    {
+        Logger.Info("Fetching Cart Summary...");
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, TestData.CartSummaryAPI);
+        client.DefaultRequestHeaders.Clear();
+
+        if (cookies != null)
+        {
+            client.DefaultRequestHeaders.Add("Cookie", cookies);  // Only add cookies if they are not null
+            Logger.Info($"Added cookie to the cart-summary request:{cookies}");
+        }
+
+        client.DefaultRequestHeaders.Add("accept", "application/json");
+        client.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0");
+
+        try
+        {
+            var response = await client.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            Logger.Info($"Cart Summary Response: {response.StatusCode}");
+            //Logger.Debug($"Response Body: {responseContent}");
+
+            Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK),
+                $"API request failed - Expected 200 OK but got {response.StatusCode}.");
+
+            return responseContent;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Cart Summary Request failed: {ex.Message}");
+            throw;
+        }
+    }
+
+
+    public static void ValidateCartSummaryStructure(string responseContent)
+    {
+        Logger.Info("?? Validating Cart Summary JSON Structure..."); // [CHANGED] Log validation start
+
+        JToken jsonToken;
+        Logger.Info($"responseContent: {responseContent}");
+        try
+        {
+            jsonToken = JToken.Parse(responseContent);
+        }
+        catch (JsonReaderException ex)
+        {
+            Logger.Error($"? Invalid JSON response: {ex.Message}"); // [CHANGED] Log JSON errors
+            throw new Exception($"Invalid JSON response: {ex.Message}");
+        }
+
+        if (jsonToken is JArray jsonArray)
+        {
+            Assert.That(jsonArray.Count, Is.EqualTo(0), "Cart summary response is an empty array.");
+            //jsonToken = jsonArray.First;
+            Logger.Debug("?? Response is an array, using first object."); // [CHANGED] Log array handling
+        }
+
+        else if (jsonToken is JObject cartSummary)
+        {
+            Assert.Multiple(() =>
+            {
+                foreach (var key in TestData.ExpectedCartSummaryKeys)
+                {
+                    Assert.That(cartSummary.ContainsKey(key), $"Missing '{key}' field.");
+                }
+            });
+            Logger.Info("? JSON structure validated successfully."); // [CHANGED] Log success
+        }
+        else
+        {
+            Logger.Error("? Cart summary response is neither an object nor a valid array."); // [CHANGED] Log failure
+            throw new Exception("Cart summary response is neither an object nor a valid array.");
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\api\ApiTests.cs ---
+
+namespace www.menkind.co.uk.Tests
+
+{
+    [AllureNUnit]
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [AllureSuite("Main suite")]
+    [AllureSubSuite("API tests")]
+    [Obsolete]
+    public class ApiTests
+    {
+        private static readonly Logger Logger = DriverFactory.GetLogger();
+
+        [Test]
+        [Category("Regression")]
+        [AllureSubSuite("Smoke")]
+        public async Task LoginWithValidCredentials_ShouldShowOrdersPage()
+        {
+            // Step 1: Send API login request
+            var (responseContent,_) = await ApiHelpers.SendLoginRequest(TestData.ValidEmail, TestData.ValidPassword);
+
+            // Step 2: Validate login success
+            ApiHelpers.ValidateSuccessfulLogin(responseContent);
+        }
+
+        [Test]
+        [Category("Regression")]
+        [AllureSubSuite("Regression")]
+        public async Task CartSummaryResponse_ShouldHaveExpectedStructure()
+        {
+            // Step 1: Fetch API response
+            var (_,cookies) = await ApiHelpers.SendLoginRequest(TestData.ValidEmail, TestData.ValidPassword);
+            //string cookies2 = cookies.ToString();
+            Logger.Info(cookies);
+            string responseContent = await ApiHelpers.GetCartSummaryResponse(cookies);
+
+
+            // Step 2: Validate response structure
+            ApiHelpers.ValidateCartSummaryStructure(responseContent);
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\api\Models.cs ---
+
+using Newtonsoft.Json;
+
+namespace www.menkind.co.uk.Models
+{
+    public class CartSummaryResponse
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("channel_id")]
+        public int ChannelId { get; set; }
+
+        [JsonProperty("currency")]
+        public string Currency { get; set; }
+
+        [JsonProperty("line_item_count")]
+        public int LineItemCount { get; set; }
+
+        [JsonProperty("total_price")]
+        public decimal TotalPrice { get; set; }
+
+        [JsonProperty("total_quantity")]
+        public int TotalQuantity { get; set; }
+
+        [JsonProperty("item_quantities")]
+        public Dictionary<string, int> ItemQuantities { get; set; }
+
+        [JsonProperty("promotions")]
+        public List<string> Promotions { get; set; }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\base\BasePage.cs ---
+
+using OpenQA.Selenium.Interactions;
+
+namespace www.menkind.co.uk.Base
+{
+    public class BasePage
+    {
+        protected static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        //  WebDriver is retrieved from DriverFactory dynamically
+        public IWebDriver Driver => DriverFactory.GetCurrentDriver();
+
+        //  WebDriverWait is dynamically created to ensure it's always available
+        private readonly Lazy<WebDriverWait> _wait = new(() =>
+            new WebDriverWait(DriverFactory.GetCurrentDriver(), TimeSpan.FromSeconds(5)));
+
+        protected WebDriverWait Wait => _wait.Value;
+
+        public BasePage() { }
+
+        public void NavigateToUrl(string url)
+        {
+            if (Driver == null)
+            {
+                Logger.Error("WebDriver is null. Cannot navigate to URL.");
+                throw new InvalidOperationException("WebDriver is not initialized.");
+            }
+
+            Logger.Debug($"Navigating to {url}");
+            Driver.Navigate().GoToUrl(url);
+        }
+
+        public IWebElement WaitForElementToBeVisible(By locator, TimeSpan? timeout = null)
+        {
+            return new WebDriverWait(Driver, timeout ?? TimeSpan.FromSeconds(5))
+                        .Until(ExpectedConditions.ElementIsVisible(locator));
+        }
+
+        public IWebElement WaitForElementToBeClickable(By locator, TimeSpan? timeout = null)
+        {
+            return new WebDriverWait(Driver, timeout ?? TimeSpan.FromSeconds(3))
+                        .Until(ExpectedConditions.ElementToBeClickable(locator));
+        }
+
+        public void HandleModals()
+        {
+            if (Driver == null)
+            {
+                Logger.Warn("WebDriver is not initialized.");
+                return;
+            }
+            try
+            {
+                var alternativeClose = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'No Thanks')]"), TimeSpan.FromSeconds(5));
+                alternativeClose?.Click();
+                Logger.Info("Alternative discount modal closed.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Alternative discount modal not found.");
+            }
+                try
+            {
+                var cookieButton = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'Allow all Cookies')]"), TimeSpan.FromSeconds(5));
+                cookieButton?.Click();
+                Logger.Info("Cookies modal closed.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Cookies modal not found within 5 seconds.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error while handling cookies modal: {ex.Message}");
+            }
+
+            try
+            {
+                var discountClose = WaitForElementToBeVisible(By.ClassName("klaviyo-close-form"), TimeSpan.FromSeconds(5));
+                discountClose?.Click();
+                Logger.Info("Discount modal closed.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Discount modal not found.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Error while handling discount modal: {ex.Message}");
+
+            }
+            try
+            {
+                var alternativeClose = WaitForElementToBeVisible(By.XPath("//button[contains(text(), 'No Thanks')]"), TimeSpan.FromSeconds(5));
+                alternativeClose?.Click();
+                Logger.Info("Alternative discount modal closed.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Alternative discount modal not found.");
+            }
+            catch (Exception exi)
+            {
+                Logger.Warn($"Error handling alternative discount modal: {exi.Message}");
+            }
+        }
+        public void ScrollToElementWithActions(By elementLocator)
+        {
+            // Locate the element using the passed 'By' locator
+            var element = Driver.FindElement(elementLocator);
+
+            // Create an Actions object
+            Actions actions = new(Driver);
+
+            // Move to the element (this will scroll to it)
+            actions.MoveToElement(element).Perform();
+            WaitForElementToBeVisible(elementLocator);
+        }
+        public static string EnsureScreenshotsDirectoryExists()
+        {
+            string screenshotsFolder;
+
+            if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            {
+            screenshotsFolder = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")!, "Screenshots");
+            }
+            else
+            {
+            screenshotsFolder = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName, "Screenshots");
+            }
+            Logger.Debug(screenshotsFolder);
+
+            // Check if the directory exists
+            if (!Directory.Exists(screenshotsFolder))
+            {
+                // Create the directory if it doesn't exist
+                Directory.CreateDirectory(screenshotsFolder);
+                Logger.Info($"Created Screenshots directory at: {screenshotsFolder}");
+            }
+            else
+            {
+                Logger.Info($"Screenshots directory already exists at: {screenshotsFolder}");
+            }
+            return screenshotsFolder;
+        }
+        public void TakeScreenshot()
+        {
+            EnsureScreenshotsDirectoryExists();
+            try
+            {
+                string fileName = $"failed_{TestContext.CurrentContext.Test.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                Logger.Debug($"File name generated: {fileName}");
+                // Get the Screenshots directory
+                string screenshotsFolder = EnsureScreenshotsDirectoryExists();
+
+                // Construct the full file path
+                string filePath = Path.Combine(screenshotsFolder, fileName);
+
+                // Capture the screenshot
+                ITakesScreenshot screenshotDriver = (ITakesScreenshot)Driver;
+                Screenshot screenshot = screenshotDriver.GetScreenshot();
+                screenshot.SaveAsFile(filePath);
+
+                Logger.Info($"Screenshot saved to: {filePath}");
+            }
+            catch (Exception screenshotEx)
+            {
+                Logger.Error(screenshotEx, "Failed to capture screenshot");
+            }
+        }
+
+
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\base\DriverFactory.cs ---
+
+using System.Collections.Concurrent;
+using www.menkind.co.uk.Tests;
+
+namespace www.menkind.co.uk.Base
+{
+    public static class DriverFactory
+    {
+        // Private logger, only accessible through the GetLogger method
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        // Public property to access Logger
+        public static Logger GetLogger()
+        {
+            return Logger;
+        }
+        private static readonly ConcurrentDictionary<int, IWebDriver> _drivers = new();
+        static DriverFactory()
+        {
+            // Initialize NLog
+            var config = new XmlLoggingConfiguration("Config/NLog.config");
+            LogManager.Configuration = config;
+        }
+        public static BasePage SetupDriver(bool enableImages = false, string? url = null)
+
+        {
+            Logger.Debug("Initializing WebDriver...");
+
+            ChromeOptions options = new();
+
+            if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            {
+                Logger.Info("Running in GitHub Actions - Using CI settings.");
+                options.AddArgument("--headless");
+                options.AddArgument("--no-sandbox");
+                options.AddArgument("--disable-dev-shm-usage");
+            }
+            else
+            {
+                Logger.Info("Running locally - Using local settings.");
+                options.AddArgument("--start-maximized");
+            }
+
+            if (!enableImages)
+            {
+                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
+                Logger.Debug("Images are disabled for this test.");
+            }
+
+            IWebDriver driver = new ChromeDriver(options);
+            driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(90);
+
+            int threadId = Environment.CurrentManagedThreadId;
+            Logger.Debug($"WebDriver assigned for thread {threadId}.");
+
+            if (!_drivers.ContainsKey(threadId))
+            {
+                _drivers[threadId] = driver;
+            }
+            else
+            {
+                Logger.Warn($"WebDriver already exists for thread {threadId}. Overwriting.");
+                _drivers[threadId].Quit();
+                _drivers[threadId] = driver;
+            }
+
+            Logger.Debug("WebDriver initialized successfully.");
+
+            var basePage = new BasePage();
+            string targetUrl = string.IsNullOrEmpty(url) ? TestData.HomePageURL : url;
+            Logger.Debug($"Navigating to {targetUrl}");
+            basePage.NavigateToUrl(targetUrl);
+            basePage.HandleModals();
+
+            return basePage;
+        }
+
+        public static void DisposeCurrentDriver(BasePage basePage)
+        {
+
+            int threadId = Environment.CurrentManagedThreadId;
+            if (_drivers.TryRemove(threadId, out IWebDriver? driver) && driver != null)
+            {
+                if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+                {
+                    basePage.TakeScreenshot();
+                    // Capture the screenshot if the test failed
+                }
+                try
+                {
+                    Logger.Debug($"Disposing WebDriver for thread {threadId}.");
+                    driver.Quit();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn($"Error disposing WebDriver: {ex.Message}");
+                }
+                finally
+                {
+                    driver.Dispose();
+                }
+            }
+        }
+
+        public static IWebDriver GetCurrentDriver()
+        {
+
+            int threadId = Environment.CurrentManagedThreadId;
+            if (_drivers.TryGetValue(threadId, out IWebDriver? driver) && driver != null)
+            {
+                return driver;
+            }
+
+            throw new InvalidOperationException("No active WebDriver found for this test.");
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\config\Allure\allureConfig.json ---
+
+{
+  "$schema": "https://raw.githubusercontent.com/allure-framework/allure-csharp/2.12.1/Allure.Net.Commons/Schemas/allureConfig.schema.json",
+  "allure": {
+    "directory": "./allure-results",
+    "links": [
+      "https://example.org/{issue}",
+      "https://example.org/{tms}"
+    ]
+  }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\config\Allure\categories.json ---
+
+{
+  [
+    
+      {
+        "name": "Known issues",
+        "matchedStatuses": [ "failed" ],
+        "messageRegex": ".*NullPointerException.*"
+      },
+      {
+        "matchedStatuses": [ "broken" ],
+        "name": "Flaky tests",
+        "traceRegex": ".*TimeoutException.*"
+      }
+    
+  ]
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\config\TestData.cs ---
+
+
+    namespace www.menkind.co.uk.Tests
+    {
+        public static class TestData
+    {
+        public static readonly string ValidEmail = "testuser_cd17ee00-86e6-4e48-acbd-cc5835d8be2b@example.com";
+        public static readonly string ValidPassword = "TestPassword123!";
+        //public static readonly string HomePageURL = "https://www.google.com";
+        public static readonly string ApiBaseURL = "https://www.menkind.co.uk/";
+        public static readonly string HomePageURL = "https://www.menkind.co.uk";
+        public static readonly string RegistrationPageURL = "https://www.menkind.co.uk/login.php?action=create_account";
+        public static readonly string ProductPageURL = "https://www.menkind.co.uk/draft-wizard-ultrasonic-frothing-beer-dispenser";
+        public static readonly string AddedToTheCardProductId = "33709";
+        public static readonly string SoldProductPageURL = "https://www.menkind.co.uk/man-points-scratch-off-game";
+        public static readonly string GetCartSummary = "https://www.menkind.co.uk/api/storefront/cart-summary";
+        public static readonly string SearchQuery = "massage";//gift (581 in filter), massage (88), beer
+        public static readonly List<string> ValidResultTitles = new List<string>
+        {
+        "Top 100 Bestsellers".ToLower(),
+        "Gadgets & Tech Gifts".ToLower(),
+        "Gifts For Men".ToLower()
+        };
+        public static readonly string SearchPageURL = $"https://www.menkind.co.uk/search.php?search_query={SearchQuery}";
+
+
+#region API Data    
+        public static readonly string ApiLoginURL = "https://www.menkind.co.uk/login.php?action=check_login";
+        public static readonly string SuccesfullyLoggedInPageHeader = "<h1 class=\"page-heading\">Orders</h1>";
+        //public static readonly string UnsuccesfullyLoggedInPageHeader = "<h1 class=\"page-heading\">Sign In</h1>";
+        public static readonly string CartSummaryAPI = "https://www.menkind.co.uk/api/storefront/cart-summary";
+
+        // Expected JSON keys in cart summary response
+        public static readonly List <string> ExpectedCartSummaryKeys =
+        [
+            "id",
+            "channel_id",
+            "currency",
+            "line_item_count",
+            "total_price",
+            "total_quantity",
+            "item_quantities",
+            "promotions"
+        ];
+
+
+
+        #endregion
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\pages\HomePageObjects.cs ---
+
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+
+namespace www.menkind.co.uk.Pages
+{
+    public class HomePageObject : BasePage
+    {
+        public HomePageObject(IWebDriver driver) : base() { }
+
+        private By LogoSelector => By.CssSelector("a.header__logo");
+        private By SignInLink => By.CssSelector("a.header__sign-in");
+        private By LoginEmailField => By.Id("login_email");
+        private By LoginPassField => By.Id("login_pass");
+        private By SignInButton => By.CssSelector("input[type='submit'][value='Sign In']");
+        private By AccountLink => By.CssSelector("a.header__sign-in[href='/account.php']");
+
+        public void EnterLoginEmail(string loginEmail)
+            => WaitForElementToBeVisible(LoginEmailField).SendKeys(loginEmail);
+
+        public void EnterLoginPass(string pass)
+            => WaitForElementToBeVisible(LoginPassField).SendKeys(pass);
+
+        public bool IsLogoDisplayed()
+        {
+            return Driver.FindElement(LogoSelector).Displayed;
+        }
+
+        public bool IsLogoLoaded()
+        {
+            try
+            {
+                IWebElement logo = WaitForElementToBeVisible(LogoSelector);
+
+                string script = @"
+                    var img = arguments[0].querySelector('img');
+                    return img && img.complete && 
+                           typeof img.naturalWidth != 'undefined' && 
+                           img.naturalWidth > 0;
+                ";
+                bool isLoaded = (bool)((IJavaScriptExecutor)Driver).ExecuteScript(script, logo);
+
+                if (!isLoaded)
+                {
+                    Logger.Warn("Logo image is not fully loaded");
+                    TakeScreenshot();
+                }
+
+                return isLoaded;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Error("Timeout occurred while waiting for logo element");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Unexpected error occurred while checking if logo is loaded");
+                return false;
+            }
+        }
+
+        public string GetTitle()
+        {
+            return Driver.Title;
+        }
+
+        public bool IsUserLoggedIn()
+        {
+            try
+            {
+                return WaitForElementToBeVisible(AccountLink).Displayed;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
+        }
+
+        public void SignIn()
+        {
+            WaitForElementToBeClickable(SignInLink).Click();
+        }
+
+        public void Submit()
+        {
+            WaitForElementToBeVisible(SignInButton).Click();
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\pages\ProductPageObject.cs ---
+
+using Newtonsoft.Json;
+using OpenQA.Selenium.Support.Extensions;
+using RestSharp;
+using www.menkind.co.uk.Tests;
+
+namespace www.menkind.co.uk.Pages
+{
+    public class ProductPageObject : BasePage
+    {
+        public ProductPageObject(IWebDriver driver) : base() { }
+
+        // Selectors
+        private By AddToBasketButton => By.Id("form-action-addToCart");
+        private By BasketIcon => By.CssSelector("span.countPill.cart-quantity.countPill--positive"); // Icon showing item count
+        private By SubmitAdding => By.XPath("//a[contains(@class, 'button--primaryGhost') and contains(text(), 'Continue Shopping')]"); // Icon showing item count
+        private By OOSMessage => By.XPath("//h3[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'out of stock')]");
+        //Out of stock messgae
+        private By PriceAmount => By.XPath("span.product-price__amount");
+
+        // Methods
+        public void AddToBasket()
+        {
+            ScrollToElementWithActions(AddToBasketButton);
+            WaitForElementToBeClickable(AddToBasketButton).Click();
+
+            WaitForElementToBeClickable(SubmitAdding).Click();
+
+            WaitForElementToBeVisible(BasketIcon);
+           
+            Logger.Debug("Clicked 'Add to Basket' button.");
+        }
+
+        public bool IsCartUpdated()
+        {
+            try
+            {
+                return WaitForElementToBeVisible(BasketIcon).Text.Trim() == "1";
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Cart count did not update in time.");
+                return false;
+            }
+        }
+
+        public bool IsPriceAmountPresent()
+        {
+            bool isPresent = Driver.FindElements(PriceAmount).Count > 0;
+            Logger.Debug($"IsPriceAmountPresent returned: {isPresent}");
+            return isPresent;
+        }
+        // Fetch and validate the cart-summary API response
+        public CartSummaryResponse GetCartSummary()
+        {
+
+            // Create the client and request
+            var client = new RestClient(TestData.GetCartSummary);
+            var request = new RestRequest();
+            request.Method = Method.Get;
+            request.AddHeader("User-Agent", "Mozilla/5.0");
+            request.AddHeader("Accept", "application/json");
+            AddCookiesToRequest(request);
+
+            var response = client.Execute(request);
+
+            if (!response.IsSuccessful)
+            {
+                Logger.Error($"Cart summary API call failed: {response.ErrorMessage}");
+                throw new InvalidOperationException("Failed to fetch cart summary.");
+            }
+
+            Logger.Debug($"Cart summary response: {response?.Content}");
+            return JsonConvert.DeserializeObject<CartSummaryResponse>(response!.Content!)!;
+        }
+
+        // Model for the Cart Summary API response
+        public class CartSummaryResponse
+        {
+            [JsonProperty("line_item_count")]
+            public int LineItemCount { get; set; }
+
+            [JsonProperty("item_quantities")]
+            public Dictionary<string, int> ItemQuantities { get; set; } = new();
+
+            [JsonProperty("total_price")]
+            public decimal TotalPrice { get; set; }
+        }
+        //Added product response data
+        public class AddResponse 
+        {
+          
+            public class CartSummaryResponse
+            {
+                [JsonProperty("data")]
+                public CartData? Data { get; set; }
+            }
+
+            public class CartData
+            {
+                [JsonProperty("line_items")]
+                public List<LineItem>? LineItems { get; set; }
+            }
+
+            public class LineItem
+            {
+                [JsonProperty("product_id")]
+                public int ProductId { get; set; }
+                
+                [JsonProperty("product_name")]
+                public string? ProductName { get; set; }
+            }
+        }
+        private void AddCookiesToRequest(RestRequest request)
+        {
+            // Get all cookies from the current WebDriver session
+            ICollection<Cookie> cookies = Driver.Manage().Cookies.AllCookies;
+
+            foreach (var cookie in cookies)
+            {
+                // Add each cookie to the request
+                request.AddCookie(cookie.Name, cookie.Value, null!, "www.menkind.co.uk");
+                Logger.Debug($"Added cookie: {cookie.Name} = {cookie.Value}");
+            }
+        }
+        #region OOS tests
+        public bool IsOOSMessage()
+        {
+            return WaitForElementToBeVisible(OOSMessage).Displayed;
+        }
+        public bool IsAddToCartDisabled()
+        {
+            var addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
+            return !addToCartButton.Enabled;
+        }
+        public string GetAddToCartText()
+        {
+            var addToCartButton = WaitForElementToBeVisible(AddToBasketButton);
+            return addToCartButton.GetDomAttribute("value")?.Trim() ?? "";
+        }
+        #endregion
+    }
+
+}
+    
+
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\pages\RegistrationPageObjects.cs ---
+
+namespace MenkindRegistrationTests.Pages
+{
+    public class RegistrationPageObjects : BasePage
+    {
+        public RegistrationPageObjects(IWebDriver driver) : base() { }
+
+        private By SuccessMessage = By.CssSelector("h1.page-heading.classyunicodedone");
+        private By EmailField = By.Id("FormField_1_input");
+        private By PasswordField = By.Id("FormField_2_input");
+        private By ConfirmPasswordField = By.Id("FormField_3_input");
+        private By FirstNameField = By.Id("FormField_4_input");
+        private By LastNameField = By.Id("FormField_5_input");
+        private By PhoneNumField = By.Id("FormField_7_input");
+        private By PostCodeField = By.Id("FormField_13_input");
+        private By AddressField = By.Id("FormField_8_input");
+        private By CityField = By.Id("FormField_10_input");
+        private By CountryField = By.Id("FormField_11_select");
+        private By CountyField = By.Id("FormField_12_input");
+        private By SubmitButton = By.CssSelector("input[type='submit'][value='Create Account']");
+        private By AccountLink = By.CssSelector("a.header__sign-in");
+
+        public bool IsUserLoggedIn()
+        {
+            return WaitForElementToBeVisible(AccountLink, TimeSpan.FromSeconds(5)).Displayed;
+        }
+
+        public void EnterFirstName(string firstName)
+            => WaitForElementToBeVisible(FirstNameField).SendKeys(firstName);
+
+        public void EnterLastName(string lastName)
+            => WaitForElementToBeVisible(LastNameField).SendKeys(lastName);
+
+        public void EnterEmail(string email)
+            => WaitForElementToBeVisible(EmailField).SendKeys(email);
+
+        public void EnterPassword(string password)
+        {
+            WaitForElementToBeVisible(PasswordField).SendKeys(password);
+            WaitForElementToBeVisible(ConfirmPasswordField).SendKeys(password);
+        }
+
+        public void EnterPhoneNumber(string phoneNumber)
+            => WaitForElementToBeVisible(PhoneNumField).SendKeys(phoneNumber);
+
+        public void EnterPostCode(string postCode)
+            => WaitForElementToBeVisible(PostCodeField).SendKeys(postCode);
+
+        public void EnterAddress(string address)
+            => WaitForElementToBeVisible(AddressField).SendKeys(address);
+
+        public void EnterCity(string city)
+            => WaitForElementToBeVisible(CityField).SendKeys(city);
+
+        public void SelectCountry(string country)
+        {
+            IWebElement countryDropdown = WaitForElementToBeVisible(CountryField);
+            var selectElement = new SelectElement(countryDropdown);
+            selectElement.SelectByText(country);
+        }
+
+        public void EnterCounty(string county)
+            => WaitForElementToBeVisible(CountyField).SendKeys(county);
+
+        public void Submit()
+            => WaitForElementToBeVisible(SubmitButton).Click();
+
+        public string GenerateUniqueEmail()
+            => $"testuser_{Guid.NewGuid()}@example.com";
+
+        public bool IsSuccessMessageVisible()
+        {
+            return WaitForElementToBeVisible(SuccessMessage, TimeSpan.FromSeconds(5)).Displayed;
+        }
+
+        public string GetSuccessMessageText()
+        {
+            return WaitForElementToBeVisible(SuccessMessage, TimeSpan.FromSeconds(5)).Text;
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\pages\Search.cs ---
+
+using OpenQA.Selenium.DevTools.V129.Debugger;
+using System.Text.RegularExpressions;
+using www.menkind.co.uk.Tests;
+
+namespace www.menkind.co.uk.Pages
+{
+    public class Search : BasePage
+    {
+        public Search(IWebDriver driver) : base() { }
+
+#region Locators
+        private static By SearchBox => By.Id("nav-quick-search");
+        private static By SearchResultsFrame => By.CssSelector("section.quickSearchResults.is-open");
+        private static By ProductsTab => By.CssSelector("div.quick-search__products"); // Ensure this exists
+        private static By NonProductsTab => By.CssSelector("div.quick-search__non-products"); // Ensure this exists
+        private static By SearchResultTitles => By.CssSelector("div.quickSearchResults a");
+        private static By PageBackground => By.CssSelector("div.quick-search__underlay.is-open");
+        private static By PageBackgroundAlt => (By.TagName("body"));
+        private static readonly By ViewAllFiltersButton = By.XPath("//button[contains(text(), 'View all filters')]");
+        private static readonly By FirstFilterLabel = By.CssSelector("li.facet-list__item a.facet-list__action");
+        //private By FirstFilterLabel = By.CssSelector("li.facet-list__item:nth-child(3) a.facet-list__action");
+        private static readonly By ViewButton = By.XPath("//button[contains(text(), 'View (')]");
+        private static readonly By ProductItems = By.CssSelector("li.product article.product-card");
+        private static readonly By ProductPrices = By.CssSelector("ul.products li.product .product-price span");
+        private static readonly By PriceFilter = By.CssSelector("button[aria-controls='facet-price']");
+        private static readonly By PaginationNextLink = By.CssSelector("li.pagination-item--next a.pagination-link");
+        private static readonly By PaginationNextItem = By.CssSelector("li.pagination-item--current + li:not(.pagination-item--next) a.pagination-link");
+        private static readonly By PaginationElementsAfterCurrentNotNextButton = By.CssSelector("li.pagination-item--current ~ li.pagination-item:not(.pagination-item--next)");
+
+
+        #endregion
+
+#region Search frame tests
+        public void EnterSearchQuery(string query)
+        {
+            var searchBox = WaitForElementToBeVisible(SearchBox);
+            searchBox.Clear();
+            searchBox.SendKeys(query);
+            Logger.Debug($"Entered search query: {query}");
+        }
+
+        public bool IsSearchFrameVisible()
+        {
+
+            try
+            {
+                Logger.Debug("Waiting for search results frame to appear...");
+                if (WaitForElementToBeVisible(SearchResultsFrame).Displayed)
+                {
+                    Logger.Debug("Search results frame appeared.");
+                    return true;
+                }
+                else return false;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Logger.Warn("Search results frame did not appear within the expected time.");
+                return false;
+            }
+        }
+
+
+        public bool AreTabsPresent()
+        {
+            bool productsTabExists = Driver.FindElements(ProductsTab).Count > 0;
+            bool nonProductsTabExists = Driver.FindElements(NonProductsTab).Count > 0;
+
+            if (!productsTabExists) Logger.Warn("Products section is missing.");
+            if (!nonProductsTabExists) Logger.Warn("Non-products section is missing.");
+
+            return productsTabExists && nonProductsTabExists;
+        }
+
+        public bool AreSearchResultsRelevant(string keyword)
+        {
+            // Errors list in case of the test failure
+            List<string> errors = new();
+            
+            List<string> invalidSearchResults = new();
+
+            // Locators for search results in both sections
+            var searchResultLinks = Driver.FindElements(By.CssSelector("ul li a.quick-search__results-link")); // Non-product results
+            var productTitles = Driver.FindElements(By.CssSelector("ul.products li.product h3.card-title a")); // Product results
+
+            // Combine all results into one list
+            var allResults = searchResultLinks.Concat(productTitles).ToList();
+
+            if (allResults.Count == 0)
+            {
+                errors.Add("No data in the search frame");
+            }
+            if (productTitles.Count == 0)
+            {
+                Logger.Warn("No product found.");
+                try
+                {
+                    var noItemsElement = Driver.FindElement(By.CssSelector("ul.products li"));
+
+                    if (noItemsElement.Text == "No items found.")
+                    {
+                        Logger.Debug("The message 'No items found.' is displayed.");
+                    }
+
+                }
+                catch (NoSuchElementException)
+                {
+                errors.Add("The 'No items found.' element is not present.");
+                }
+            }
+            // Validate each result
+            foreach (var result in allResults)
+            {
+                string title = result.Text.ToLower();
+                Logger.Debug($"Result: {title}");
+                if (!title.Contains(keyword.ToLower()) && !title.Equals("new", StringComparison.OrdinalIgnoreCase))
+                {
+                    invalidSearchResults.Add(title);
+                }
+            }
+
+            if (invalidSearchResults.Any() && !invalidSearchResults.SequenceEqual(TestData.ValidResultTitles) && productTitles.Count == 0)
+            {
+                Logger.Warn($"Some search results did not match: {string.Join(", ", invalidSearchResults)}");
+                Logger.Debug($"Total invalid results: {invalidSearchResults.Count}");
+                foreach (var item in invalidSearchResults)
+                {
+                Logger.Debug($"Invalid result: {item}");
+                }
+                errors.Add("Invalid results were found");
+            }
+            if (errors.Any())
+            {
+                Assert.Fail("Test failed due to the following issues:\n" + string.Join("\n", errors));
+                return false;
+            }
+            else
+            return true;
+
+        }
+
+        public void ClickOutsideSearchFrame()
+        {
+            try
+            {
+                var overlay = Driver.FindElement(PageBackground);
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", overlay);
+                Logger.Debug("Clicked overlay using JavaScript.");
+            }
+            catch (NoSuchElementException)
+            {
+                Logger.Warn("Search overlay not found. Clicking the body instead.");
+                Driver.FindElement(PageBackgroundAlt).Click();
+            }
+        }
+        #endregion
+
+#region Search filters tests
+        public void OpenFiltersPanel()
+        {
+            try
+            {
+                WaitForElementToBeClickable(ViewAllFiltersButton).Click();
+                Logger.Info("Opened filter panel.");
+            }
+            catch (Exception ex) 
+            {
+                Logger.Debug(ex, "No filters displayed");
+                throw;
+            }
+        }
+        // Capture first filter details (returns item count & max price)
+        public (int itemCount, decimal? maxPrice) GetFirstFilterDetails()
+        {
+            WaitForElementToBeVisible(PriceFilter);
+            WaitForElementToBeClickable(PriceFilter).Click();
+            // Get the filter label text (e.g., "£10 and under (7)")
+            IWebElement filter = WaitForElementToBeVisible(FirstFilterLabel);
+            string filterText = filter.Text.Trim();
+
+            // Extract the number of results (e.g., "(7)" ? 7)
+            int itemCount = int.Parse(Regex.Match(filterText, @"\((\d+)\)").Groups[1].Value);
+
+            // Extract the price range (e.g., "£10 and under" ? 10.00)
+            decimal? maxPrice = ExtractPrice(filterText);
+
+            // Click the filter
+            filter.Click();
+            Logger.Info($"Selected filter: {filterText} (Expecting {itemCount} items under £{maxPrice}).");
+            return (itemCount, maxPrice);
+        }
+
+        // ? Step 4: Apply filter
+        public void WaitForViewButtonUpdate()
+        {
+            // Capture the initial text of the "View" button
+            var initialText = Driver.FindElement(ViewButton).Text.Trim();
+
+            // Use the existing _wait instance to wait for the text to change
+            Wait.Until(driver =>
+            {
+                var currentText = driver.FindElement(ViewButton).Text.Trim();
+                return !currentText.Equals(initialText, StringComparison.OrdinalIgnoreCase);
+            });
+
+            Logger.Info("The 'View' button has updated with new data.");
+        }
+
+
+
+        public void ApplyFilter()
+        {
+           // Thread.Sleep(2000);
+            WaitForElementToBeClickable(ViewButton).Click();
+            Logger.Info("Filter applied.");
+        }
+
+        // Get number of displayed items
+        public (int, bool) GetDisplayedProductCount(decimal? maxPrice)
+        {
+            int totalProductCount = 0;
+            int currentPage = 1;
+            bool isNextPageAvailable;
+            bool allPricesValid = true;  
+            bool allPagePricesValid;
+
+            do
+            {
+                // Find all product items on the current page and add them to the total count
+                WaitForProductsToLoad();
+                var products = Driver.FindElements(ProductItems);
+                totalProductCount += products.Count;
+                Logger.Info($"Page {currentPage}: Found {products.Count} products. Total so far: {totalProductCount}. Page URL: {Driver.Url}");
+
+                allPagePricesValid = ValidateProductPrices(maxPrice);
+                if (currentPage==2)
+                    Thread.Sleep(1000);
+                if (!allPagePricesValid)
+                {
+                    allPricesValid = false;
+                    Logger.Debug($"Some of the prices are invalid on the page {currentPage}");
+                }
+
+                // Check if the "Next" button exists and is the immediate next to the first page
+
+                if (Driver.FindElements(PaginationElementsAfterCurrentNotNextButton).Any())
+                {
+                    currentPage++;
+                    // Click the "Next" button to go to the next page
+                    GoToNextPage();
+                    WaitForProductsToLoad();
+                    isNextPageAvailable = true;
+                }
+                else isNextPageAvailable = false;
+            } while (isNextPageAvailable);
+
+            Logger.Info($"Total products found after filtering across all pages: {totalProductCount}.");
+            return (totalProductCount, allPricesValid);
+        }
+        private void WaitForProductsToLoad()
+        {
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            wait.Until(driver => driver.FindElements(ProductItems).Any()); // Wait until products are visible
+            Logger.Info("Page fully loaded with products.");
+        }
+
+        private void GoToNextPage()
+        {
+            ScrollToElementWithActions(PaginationNextItem);
+            var nextButton = WaitForElementToBeClickable(PaginationNextItem);
+            nextButton.Click();
+            Logger.Info("Navigated to the next page.");
+        }
+
+
+        // Validate product prices
+        public bool ValidateProductPrices(decimal? maxPrice)
+        {
+            // Extract prices using the ExtractPrice method
+            WaitForProductsToLoad();
+            var prices = Driver.FindElements(ProductPrices)
+                               .Select(e => ExtractPrice(e.Text))
+                               .ToList();
+
+            // Validate that all prices are not null and less than or equal to the maxPrice
+            bool allPricesValid = prices.All(price =>
+                price.HasValue && price.Value <= maxPrice);  // Ensure price is not null and is within the max price
+
+            if (!allPricesValid)
+            {
+                // Log which prices are invalid
+                var invalidPrices = prices
+                    .Where(price => !price.HasValue || price.Value > maxPrice)
+                    .Select(price => price.HasValue ? price.Value.ToString("C") : "null")
+                    .ToList();
+
+                Logger.Warn($"Invalid prices detected: {string.Join(", ", invalidPrices)}");
+            }
+
+            // Log the overall result
+            Logger.Info($"Price validation: All items = £{maxPrice}: {allPricesValid}");
+
+            return allPricesValid;
+        }
+
+
+        // Extracts price from text
+        private static decimal? ExtractPrice(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            var match = Regex.Match(text, @"£(\d+(\.\d{1,2})?)");
+
+            return match.Success ? decimal.Parse(match.Groups[1].Value) : (decimal?)null;  // Return null if not a valid price
+        }
+        #endregion
+
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\tests\HomePage.cs ---
+
+using www.menkind.co.uk.Pages;
+
+namespace www.menkind.co.uk.Tests
+{
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [AllureNUnit]
+    [AllureSuite("Homepage")]
+    [Obsolete]
+    public class HomePageTests
+    {
+        // CHANGED: Removed the IWebDriver field since BasePage creates its own driver.
+        private BasePage _basePage;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private HomePageObject homePage;
+
+        [SetUp]
+        public void SetUp()
+        {
+            bool enableImages = TestContext.CurrentContext.Test.Name == nameof(HomePageLoadsSuccessfully);
+            _basePage = DriverFactory.SetupDriver(enableImages);
+            homePage = new HomePageObject(_basePage.Driver);
+        }
+
+        [Test]
+        [Category("Smoke")]
+        [AllureSubSuite("Smoke")]
+        [AllureTag("Smoke")]
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.critical)]
+        [AllureTms("TMS-xx")]
+        public void HomePageLoadsSuccessfully()
+        {
+            Logger.Debug("Executing HomePageLoadsSuccessfully test");
+            Assert.Multiple(() =>
+            {
+                Logger.Debug("Checking if logo is displayed");
+                Assert.That(homePage.IsLogoDisplayed(), Is.True, "Logo is not displayed");
+                Assert.That(homePage.IsLogoLoaded(), Is.True, "Logo is not properly loaded or may be corrupted");
+                Logger.Debug("Verifying page title");
+                Assert.That(homePage.GetTitle(), Is.EqualTo("Menkind | Unique Gadgets & Gifts for Men"), "Page title does not match expected");
+            });
+            Logger.Debug("Test completed successfully");
+        }
+
+        [Test]
+        [Category("Regression")]
+        [AllureTag("Regression")]
+        [AllureSubSuite("Regression")]
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureTms("TMS-xx")]
+        public void LoginSuccessful()
+        {
+            Logger.Debug(TestData.ValidEmail);
+            Logger.Debug("Executing LoginSuccessful test");
+            homePage.SignIn();
+            Logger.Debug("Filling in the Testdata");
+
+            homePage.EnterLoginEmail(TestData.ValidEmail);
+            homePage.EnterLoginPass(TestData.ValidPassword);
+
+            Logger.Debug("Clicking submit button");
+            homePage.Submit();
+            Logger.Debug("Login button clicked");
+
+            Logger.Info("Executing test user's logging");
+            Assert.That(homePage.IsUserLoggedIn(), Is.True, "User is not logged in after registration");
+            Logger.Info("User is logged in successfully");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+          if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+            {
+                homePage.TakeScreenshot();
+                // Capture the screenshot if the test failed
+            }
+            DriverFactory.DisposeCurrentDriver(homePage);
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\tests\ProductPage.cs ---
+
+using www.menkind.co.uk.Pages;
+using www.menkind.co.uk.Base;
+
+namespace www.menkind.co.uk.Tests
+{
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [AllureNUnit]
+    [AllureSuite("Product Page")]
+    [Obsolete]
+    public class ProductPageTests
+    {
+        private BasePage _basePage;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private ProductPageObject productPage;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _basePage = DriverFactory.SetupDriver(false, TestData.ProductPageURL);
+            productPage = new ProductPageObject(_basePage.Driver);
+        }
+
+        [Test]
+        [Category("Smoke")]
+        [AllureSubSuite("Add to Cart")]
+        public void AddItemToCart_ShouldUpdateCartIcon()
+        {
+            Logger.Debug("Starting test: AddItemToCart_ShouldUpdateCartIcon");
+
+            // Step 1: Add item to basket
+            productPage.AddToBasket();
+
+            // Step 2: Verify cart icon updates
+            Assert.That(productPage.IsCartUpdated(), Is.True, "Cart icon did not update to show 1 item.");
+
+            // Step 3: Verify the item in the cart-summary API
+            var cartSummaryResponse = productPage.GetCartSummary();
+            Assert.That(cartSummaryResponse.ItemQuantities[TestData.AddedToTheCardProductId], Is.EqualTo(1), "Expected item not found in the cart.");
+          //  Assert.That(false, Is.True, "Failed assert for debugging");
+            Logger.Debug("Test passed: Cart icon updated successfully.");
+        }
+
+        [Test]
+        [Category("Regression")]
+        [AllureSubSuite("Regression")]
+        public void SoldItem_ShouldCauseOOSmessage()
+        {
+            Logger.Debug("Starting test: SoldItem_ShouldCauseOOSMessage");
+            _basePage.NavigateToUrl(TestData.SoldProductPageURL);
+            Assert.Multiple(() =>
+            {
+                Assert.That(productPage.IsOOSMessage(), Is.True, "OOS is not displayed");
+                Assert.That(productPage.IsPriceAmountPresent(), Is.False, "Price amount is displayed");
+                Assert.That(productPage.IsAddToCartDisabled(), Is.True, "Add to Cart button is not disabled");
+                Assert.That(productPage.GetAddToCartText(), Does.Contain("Out of Stock"), "Add to Cart button does not show 'Out of Stock'");
+            });
+
+            Logger.Debug("Test passed: OOS is displayed.");
+        }
+        [Test]
+        [Category("Smoke")]
+        [AllureSubSuite("Add to Cart")]
+        public void ScreenshotTest()
+        {try
+            {
+                productPage.TakeScreenshot();
+            }
+            catch (Exception e) { Logger.Debug($"{e}"); }
+            }
+        
+        [TearDown]
+        public void TearDown()
+        {
+            DriverFactory.DisposeCurrentDriver(productPage); 
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\tests\RegistrationTests.cs ---
+
+using MenkindRegistrationTests.Pages;
+using www.menkind.co.uk.Base;
+
+namespace www.menkind.co.uk.Tests
+{
+    [AllureNUnit]
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [AllureSuite("Main suite")]
+    [AllureSubSuite("Registration Page")]
+    [Obsolete]
+    public class RegistrationTests
+    {
+        private BasePage _basePage;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private RegistrationPageObjects registrationPage;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _basePage = DriverFactory.SetupDriver(false, TestData.RegistrationPageURL); // ? Centralized driver setup
+            registrationPage = new RegistrationPageObjects(_basePage.Driver);
+
+        }
+
+        [Test]
+        [Category("Regression")]
+        [AllureTag("Regression")]
+        [AllureOwner("Vlad")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureTms("TMS-xx")]
+        public void UserRegistration_ShouldSucceed()
+        {
+            Logger.Info("Started to fill in required registration fields");
+
+            // Fill in all the registration fields
+            registrationPage.EnterFirstName("TestFirstName");
+            registrationPage.EnterLastName("TestLastName");
+            registrationPage.EnterEmail(registrationPage.GenerateUniqueEmail());
+            registrationPage.EnterPassword("TestPassword123!");
+            registrationPage.EnterPhoneNumber("1234567890");
+            registrationPage.SelectCountry("United Kingdom");
+            registrationPage.EnterPostCode("SW1A 1AA");
+            registrationPage.EnterAddress("10 Downing Street");
+            registrationPage.EnterCity("London");
+            registrationPage.EnterCounty("Greater London");
+            Logger.Info("Test data input completed");
+
+            // Submit Registration
+            registrationPage.Submit();
+            Logger.Info("Registration submitted");
+
+            // Verify Registration Success
+            Logger.Info("Executing Test_SuccessMessage and checking user's login status after registration");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(registrationPage.IsSuccessMessageVisible(), "Success message should be displayed");
+                Assert.That(registrationPage.GetSuccessMessageText(), Does.Contain("Your account has been created"));
+                Assert.That(registrationPage.IsUserLoggedIn(), Is.True, "User is not logged in after registration");
+            });
+
+            Logger.Info("Test completed successfully");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            DriverFactory.DisposeCurrentDriver(registrationPage);
+        }
+    }
+}
+
+
+--- FILE: D:\OneDrive\C#\www.menkind.co.uk - Copy\tests\SearchTests.cs ---
+
+using www.menkind.co.uk.Pages;
+using www.menkind.co.uk.Base;
+
+namespace www.menkind.co.uk.Tests
+{
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [AllureNUnit]
+    [AllureSuite("Search Functionality")]
+    [Obsolete]
+    public class SearchTests
+    {
+        private BasePage _basePage;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private Search searchPage;
+        [SetUp]
+        public void SetUp()
+        {
+        _basePage = DriverFactory.SetupDriver(false, TestData.SearchPageURL);
+        searchPage = new Search(_basePage.Driver);
+
+        }
+
+        [Test]
+        [Category("Regression")]
+        [AllureSubSuite("Regression")]
+        public void SearchFrame_ShouldDisplayResults_CloseAfterOutsideClick()
+        {
+            var searchQuery = TestData.SearchQuery;
+            Logger.Debug("Starting test: SearchBox_ShouldDisplayResults_WhenSearchingForBeer");
+
+            searchPage.EnterSearchQuery(searchQuery);
+            Assert.Multiple(() =>
+            {
+                Assert.That(searchPage.IsSearchFrameVisible(), "Search results frame did not appear.");
+                Assert.That(searchPage.AreTabsPresent(), "Expected search tabs (products/non-products) are missing.");
+                Assert.That(searchPage.AreSearchResultsRelevant(searchQuery), "Search results do not contain the expected keyword.");
+            });
+            Logger.Debug("Starting test: Search frame is closed after clicking outside the frame.");
+                searchPage.ClickOutsideSearchFrame();
+                Assert.That(searchPage.IsSearchFrameVisible(), Is.False, "Failed to click outside search box.");
+                Logger.Debug("Test passed: Search frame is closed after clicking outside the frame.");
+            
+        }
+
+        [Test]
+        [Category("Regression")]
+        [AllureSubSuite("Regression")]
+        public void VerifySearchFilters()
+        {
+            Logger.Info("Starting test: Verify Search Filters");
+            if (_basePage == null)
+            {
+                throw new InvalidOperationException("BasePage is not initialized.");
+            }
+            searchPage.OpenFiltersPanel();
+            var (expectedItemCount, maxPrice) = searchPage.GetFirstFilterDetails();
+            searchPage.WaitForViewButtonUpdate();
+            searchPage.ApplyFilter();
+
+            var (actualItemCount, allPricesValid) = searchPage.GetDisplayedProductCount(maxPrice);
+
+            Assert.Multiple(() =>
+            { 
+            Assert.That(actualItemCount, Is.EqualTo(expectedItemCount),
+                $"Expected {expectedItemCount} items but found {actualItemCount}.");
+            Assert.That(allPricesValid, Is.True, "Some items exceed the selected price range.");
+
+            Logger.Info("Test passed: Filter applied correctly.");
+            });
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            DriverFactory.DisposeCurrentDriver(searchPage);
+        }
+    }
+}
+

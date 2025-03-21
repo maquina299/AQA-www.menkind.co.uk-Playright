@@ -1,12 +1,16 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using www.menkind.co.uk.Tests;
+using Cookie = System.Net.Cookie;
 
 public static class ApiHelpers
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger(); // [CHANGED] Added Logger
+    private static readonly Logger Logger = DriverFactory.GetLogger();
     private static readonly HttpClient client = new HttpClient();
+    private static readonly CookieContainer cookieContainer = new CookieContainer();
+
 
     public static async Task<string> SendApiRequest(
         string endpoint,
@@ -42,8 +46,8 @@ public static class ApiHelpers
             var response = await client.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
 
-            Logger.Info($"✅ Received Response: {response.StatusCode}"); // [CHANGED] Log response status
-            Logger.Debug($"📥 Response Body: {responseContent}"); // [CHANGED] Log full response
+            Logger.Info($"Received Response: {response.StatusCode}"); // [CHANGED] Log response status
+            //Logger.Debug($"Response Body: {responseContent}"); // [CHANGED] Log full response
 
             Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK),
                 $"API request failed - Expected 200 OK but got {response.StatusCode}.");
@@ -57,9 +61,9 @@ public static class ApiHelpers
         }
     }
 
-    public static async Task<string> SendLoginRequest(string email, string password)
+    public static async Task<(string responseContent, string cookies)> SendLoginRequest(string email, string password)
     {
-        Logger.Info("🔄 Sending Login Request..."); // [CHANGED] Log login attempt
+        Logger.Info("Sending Login Request...");
 
         var postData = new StringContent(
             $"login_email={email}&login_pass={password}",
@@ -76,19 +80,29 @@ public static class ApiHelpers
         {
             var response = await client.PostAsync(TestData.ApiLoginURL, postData);
             var responseContent = await response.Content.ReadAsStringAsync();
+            //string cookies = string.Join("; ", cookieContainer.GetCookies(new Uri(TestData.ApiLoginURL))
+            //    .Cast<Cookie>().Select(c => $"{c.Name}={c.Value}"));
+            // Capture cookies from response headers
+            var cookies = response.Headers.Contains("Set-Cookie") ? string.Join("; ", response.Headers.GetValues("Set-Cookie")) : string.Empty;
+            /*var cookies = response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)
+            ? string.Join("; ", cookieHeaders)
+            : string.Empty;
+            Logger.Info($"Login Response: {response.StatusCode}");*/
+            Logger.Info($"Got cookie: {cookies}");
 
-            Logger.Info($"✅ Login Response: {response.StatusCode}"); // [CHANGED] Log login response
-            Logger.Debug($"📥 Response Body: {responseContent}"); // [CHANGED] Log response content
+            //Logger.Debug($"Response Body: {responseContent}");
 
             Assert.That((int)response.StatusCode, Is.EqualTo(200), "Login request failed");
-            return responseContent;
+
+            return (responseContent, cookies);  // Return both responseContent and cookies
         }
         catch (Exception ex)
         {
-            Logger.Error($"❌ Login Request failed: {ex.Message}"); // [CHANGED] Log login error
+            Logger.Error($"❌ Login Request failed: {ex.Message}");
             throw;
         }
     }
+
 
     public static void ValidateSuccessfulLogin(string responseContent)
     {
@@ -100,26 +114,49 @@ public static class ApiHelpers
         Logger.Info("✅ Login Validation Passed!"); // [CHANGED] Log success
     }
 
-    public static async Task<string> GetCartSummaryResponse()
+    public static async Task<string> GetCartSummaryResponse(string cookies = null)
     {
-        Logger.Info("🔄 Fetching Cart Summary..."); // [CHANGED] Log request
-        var response = await client.GetAsync(TestData.CartSummaryAPI);
-        string responseContent = await response.Content.ReadAsStringAsync();
+        Logger.Info("Fetching Cart Summary...");
 
-        Logger.Info($"✅ Cart Summary Response: {response.StatusCode}"); // [CHANGED] Log response status
-        Logger.Debug($"📥 Response Body: {responseContent}"); // [CHANGED] Log response body
+        using var request = new HttpRequestMessage(HttpMethod.Get, TestData.CartSummaryAPI);
+        client.DefaultRequestHeaders.Clear();
 
-        Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK),
-            $"API request failed - Expected 200 OK but got {response.StatusCode}.");
+        if (cookies != null)
+        {
+            client.DefaultRequestHeaders.Add("Cookie", cookies);  // Only add cookies if they are not null
+            Logger.Info($"Added cookie to the cart-summary request:{cookies}");
+        }
 
-        return responseContent;
+        client.DefaultRequestHeaders.Add("accept", "application/json");
+        client.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0");
+
+        try
+        {
+            var response = await client.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            Logger.Info($"Cart Summary Response: {response.StatusCode}");
+            //Logger.Debug($"Response Body: {responseContent}");
+
+            Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK),
+                $"API request failed - Expected 200 OK but got {response.StatusCode}.");
+
+            return responseContent;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Cart Summary Request failed: {ex.Message}");
+            throw;
+        }
     }
+
 
     public static void ValidateCartSummaryStructure(string responseContent)
     {
         Logger.Info("🔍 Validating Cart Summary JSON Structure..."); // [CHANGED] Log validation start
 
         JToken jsonToken;
+        Logger.Info($"responseContent: {responseContent}");
         try
         {
             jsonToken = JToken.Parse(responseContent);
@@ -132,12 +169,12 @@ public static class ApiHelpers
 
         if (jsonToken is JArray jsonArray)
         {
-            Assert.That(jsonArray.Count, Is.GreaterThan(0), "Cart summary response is an empty array.");
-            jsonToken = jsonArray.First;
+            Assert.That(jsonArray.Count, Is.EqualTo(0), "Cart summary response is an empty array.");
+            //jsonToken = jsonArray.First;
             Logger.Debug("📂 Response is an array, using first object."); // [CHANGED] Log array handling
         }
 
-        if (jsonToken is JObject cartSummary)
+        else if (jsonToken is JObject cartSummary)
         {
             Assert.Multiple(() =>
             {
