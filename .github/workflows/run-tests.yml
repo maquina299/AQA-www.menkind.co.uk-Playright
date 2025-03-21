@@ -5,8 +5,7 @@ on:
     branches:
       - master
       - driver_factory
-permissions:
-  contents: write
+
 
 jobs:
 
